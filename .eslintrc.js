@@ -39,7 +39,7 @@ module.exports = {
     //#endregion  //*======== Unused Import ===========
 
     //#region  //*=========== Import Sort ===========
-    'simple-import-sort/exports': 'warn',
+    'simple-import-sort/exports': 'error', //'warn' 警告からエラーに変更
     'simple-import-sort/imports': [
       'warn',
       {
