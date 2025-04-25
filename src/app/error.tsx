@@ -1,4 +1,3 @@
-// Error page with client directive
 'use client';
 
 export default function ErrorPage() {
