@@ -4,7 +4,7 @@ export default function ErrorPage() {
     <section className='bg-white'>
       <div className='layout flex min-h-screen flex-col items-center justify-center text-center text-black'>
         <div className='mb-6 rounded-full bg-red-100 p-4'>
-          <span className='text-5xl text-red-600'>⚠️</span>
+          <span className='text-5xl text-red-600'>警告</span>
         </div>
         <h1 className='text-3xl font-bold'>エラーが発生しました</h1>
         <p className='mt-4 text-lg'>
