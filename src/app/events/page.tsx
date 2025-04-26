@@ -1,33 +1,30 @@
 'use client';
 
-// 1. 標準ライブラリ
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'; // react 関連のインポート
 
-// 2. サードパーティライブラリ
-import { supabase } from '@/lib/supabase'; // Supabase
+import { supabase } from '@/lib/supabase'; // プロジェクト内のインポート
 
-// 3. 型定義
 type Event = {
   id: number;
   title: string;
+  event_date: string;
   description: string;
-  date: string;
 };
 
-export default function EventsPage() {
+export default function HomePage() {
   const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    // イベントデータを Supabase から取得
     const fetchEvents = async () => {
       const { data, error } = await supabase
         .from('events')
         .select('*')
-        .order('date', { ascending: true });
+        .order('event_date', { ascending: true });
 
       if (error) {
-        // エラーを表示したい場合は、例えばアラートを使用するか、ユーザーにエラーを通知する方法を検討します。
-        // alert('Error fetching events: ' + error.message); // 例: アラートでエラーを通知する場合
+        //console.error('Error fetching events:', error.message);
       } else {
         setEvents(data as Event[]);
       }
@@ -41,6 +38,7 @@ export default function EventsPage() {
   return (
     <main className='p-8'>
       <h1 className='text-2xl font-bold mb-4'>イベント一覧</h1>
+
       {loading ? (
         <p>読み込み中...</p>
       ) : events.length === 0 ? (
@@ -50,7 +48,9 @@ export default function EventsPage() {
           {events.map((event) => (
             <li key={event.id} className='border p-4 rounded shadow'>
               <h2 className='text-xl font-semibold'>{event.title}</h2>
-              <p className='text-sm text-gray-600'>{event.date}</p>
+              <p className='text-sm text-gray-600'>
+                {new Date(event.event_date).toLocaleDateString()}
+              </p>
               <p className='mt-2'>{event.description}</p>
             </li>
           ))}

@@ -13,18 +13,18 @@ module.exports = {
     'prettier',
   ],
   rules: {
+    '@typescript-eslint/no-var-requires': 'off',
     'no-unused-vars': 'off',
     'no-console': 'warn',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     'react/no-unescaped-entities': 'off',
-
     'react/display-name': 'off',
     'react/jsx-curly-brace-presence': [
       'warn',
       { props: 'never', children: 'never' },
     ],
 
-    //#region  //*=========== Unused Import ===========
+    //#region  //*=========== Unused Import ===========//
     '@typescript-eslint/no-unused-vars': 'off',
     'unused-imports/no-unused-imports': 'warn',
     'unused-imports/no-unused-vars': [
@@ -36,12 +36,12 @@ module.exports = {
         argsIgnorePattern: '^_',
       },
     ],
-    //#endregion  //*======== Unused Import ===========
+    //#endregion  //*======== Unused Import ===========//
 
-    //#region  //*=========== Import Sort ===========
-    'simple-import-sort/exports': 'error', //'warn' 警告からエラーに変更
+    //#region  //*=========== Import Sort ===========//
+    'simple-import-sort/exports': 'error', // 'warn'から 'error'に変更
     'simple-import-sort/imports': [
-      'warn',
+      'error', // 'warn'から 'error'に変更
       {
         groups: [
           // ext library & side effect imports
@@ -70,14 +70,15 @@ module.exports = {
             '^\\.\\./\\.\\./\\.\\.(?!/?$)',
           ],
           ['^@/types'],
-          // other that didnt fit in
+          // other that didn't fit in
           ['^'],
         ],
       },
     ],
-    //#endregion  //*======== Import Sort ===========
+    //#endregion  //*======== Import Sort ===========//
   },
   globals: {
+    jest: true, // jestをグローバル変数として設定
     React: true,
     JSX: true,
   },
