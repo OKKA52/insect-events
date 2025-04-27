@@ -16,6 +16,8 @@ type Museum = {
   x_url?: string;
   instagram_url?: string;
   area?: string;
+  name_kana?: string;
+  prefecture?: string;
 };
 
 // 都道府県リスト（県番号順）
@@ -72,20 +74,17 @@ const prefectures = [
 // 都道府県順に並び替える関数
 const sortByPrefecture = (list: Museum[]) => {
   return [...list].sort((a, b) => {
-    const getPrefecture = (address: string) => {
-      return prefectures.find((pref) => address.startsWith(pref)) ?? '';
-    };
-
-    const prefA = getPrefecture(a.address);
-    const prefB = getPrefecture(b.address);
-
-    const indexA = prefectures.indexOf(prefA);
-    const indexB = prefectures.indexOf(prefB);
+    const indexA = prefectures.indexOf(a.prefecture ?? '');
+    const indexB = prefectures.indexOf(b.prefecture ?? '');
 
     if (indexA !== -1 && indexB !== -1) {
+      if (indexA === indexB) {
+        // 同じ都道府県内ならふりがな順
+        return (a.name_kana ?? '').localeCompare(b.name_kana ?? '', 'ja');
+      }
       return indexA - indexB;
     } else {
-      return a.address.localeCompare(b.address, 'ja');
+      return (a.prefecture ?? '').localeCompare(b.prefecture ?? '', 'ja');
     }
   });
 };
