@@ -1,5 +1,6 @@
 'use client';
 
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
 
 import { supabase } from '@/lib/supabase';
@@ -49,14 +50,17 @@ export default function HomePage() {
             <li key={museum.id} className='border p-4 rounded shadow'>
               <h2 className='text-xl font-semibold'>{museum.name}</h2>
               <p className='text-sm text-gray-600'>{museum.address}</p>
-              <a
-                href={museum.url}
-                target='_blank'
-                rel='noopener noreferrer'
-                className='mt-2 text-blue-600 hover:underline break-words'
-              >
-                {museum.url}
-              </a>
+              {museum.url && (
+                <a
+                  href={museum.url}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='inline-flex items-center text-blue-600 hover:underline mt-2'
+                >
+                  <ArrowTopRightOnSquareIcon className='h-5 w-5 mr-1' />
+                  Webサイト
+                </a>
+              )}
             </li>
           ))}
         </ul>
