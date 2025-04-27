@@ -1,8 +1,8 @@
 'use client';
 
-import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'; // Heroicons
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
-import { FaFacebookSquare, FaInstagram } from 'react-icons/fa'; // react-icons
+import { FaFacebookSquare, FaInstagram } from 'react-icons/fa';
 
 import { supabase } from '@/lib/supabase';
 
@@ -56,22 +56,29 @@ export default function HomePage() {
   }, []);
 
   return (
-    <main className='p-8'>
-      <h1 className='text-2xl font-bold mb-4'>昆虫館一覧</h1>
+    <main className='p-6 md:p-8 lg:p-10'>
+      <h1 className='text-2xl md:text-3xl font-bold mb-6'>昆虫館一覧</h1>
 
       {loadingMuseums ? (
         <p>読み込み中...</p>
       ) : museums.length === 0 ? (
         <p>昆虫館が登録されていません。</p>
       ) : (
-        <ul className='space-y-4'>
+        <ul className='grid grid-cols-1 md:grid-cols-2 gap-6'>
           {museums.map((museum) => (
-            <li key={museum.id} className='border p-4 rounded shadow'>
-              <h2 className='text-xl font-semibold'>{museum.name}</h2>
-              <p className='text-sm text-gray-600'>{museum.address}</p>
+            <li
+              key={museum.id}
+              className='border p-4 rounded-lg shadow hover:shadow-md transition'
+            >
+              <h2 className='text-lg md:text-xl font-semibold'>
+                {museum.name}
+              </h2>
+              <p className='text-sm md:text-base text-gray-600'>
+                {museum.address}
+              </p>
 
               {/* リンク表示 */}
-              <div className='flex items-center space-x-4 mt-2'>
+              <div className='flex items-center space-x-3 md:space-x-5 mt-3'>
                 {museum.url && (
                   <a
                     href={museum.url}
@@ -80,7 +87,7 @@ export default function HomePage() {
                     className='text-blue-600 hover:underline flex items-center'
                   >
                     <ArrowTopRightOnSquareIcon className='h-5 w-5' />
-                    <span className='ml-1'>Webサイト</span>
+                    <span className='ml-1 text-sm md:text-base'>Webサイト</span>
                   </a>
                 )}
                 {museum.facebook_url && (
