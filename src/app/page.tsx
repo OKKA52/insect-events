@@ -73,90 +73,100 @@ export default function HomePage() {
   };
 
   return (
-    <main className='p-6 md:p-8 lg:p-10'>
-      <h1 className='text-2xl md:text-3xl font-bold mb-6'>昆虫館一覧</h1>
+    <main>
+      {/* 🧷 Stickyヘッダー */}
+      <div className='sticky top-0 bg-white z-10 shadow'>
+        <div className='p-6 md:p-8 lg:p-10'>
+          <h1 className='text-2xl md:text-3xl font-bold mb-4'>昆虫館一覧</h1>
 
-      {/* 🔍 リアルタイム検索バー */}
-      <div className='flex items-center space-x-2 mb-6'>
-        <input
-          type='text'
-          placeholder='施設名や住所で検索'
-          value={searchText}
-          onChange={(e) => {
-            const value = e.target.value;
-            setSearchText(value);
-            handleSearch(value);
-          }}
-          className='border rounded p-2 w-full max-w-md'
-        />
+          {/* 🔍 リアルタイム検索バー */}
+          <div className='flex items-center space-x-2'>
+            <input
+              type='text'
+              placeholder='施設名や住所で検索'
+              value={searchText}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSearchText(value);
+                handleSearch(value);
+              }}
+              className='border rounded p-2 w-full max-w-md'
+            />
+          </div>
+        </div>
       </div>
 
-      {loadingMuseums ? (
-        <p>読み込み中...</p>
-      ) : filteredMuseums.length === 0 ? (
-        <p>条件に合う昆虫館が見つかりませんでした。</p>
-      ) : (
-        <ul className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          {filteredMuseums.map((museum) => (
-            <li
-              key={museum.id}
-              className='border p-4 rounded-lg shadow hover:shadow-md transition'
-            >
-              <h2 className='text-lg md:text-xl font-semibold'>
-                {museum.name}
-              </h2>
-              <p className='text-sm md:text-base text-gray-600'>
-                {museum.address}
-              </p>
+      {/* 📋 昆虫館リスト */}
+      <div className='p-6 md:p-8 lg:p-10'>
+        {loadingMuseums ? (
+          <p>読み込み中...</p>
+        ) : filteredMuseums.length === 0 ? (
+          <p>条件に合う昆虫館が見つかりませんでした。</p>
+        ) : (
+          <ul className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
+            {filteredMuseums.map((museum) => (
+              <li
+                key={museum.id}
+                className='border p-4 rounded-lg shadow hover:shadow-md transition'
+              >
+                <h2 className='text-lg md:text-xl font-semibold'>
+                  {museum.name}
+                </h2>
+                <p className='text-sm md:text-base text-gray-600'>
+                  {museum.address}
+                </p>
 
-              {/* リンク表示 */}
-              <div className='flex items-center space-x-3 md:space-x-5 mt-3'>
-                {museum.url && (
-                  <a
-                    href={museum.url}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-blue-600 hover:underline flex items-center'
-                  >
-                    <ArrowTopRightOnSquareIcon className='h-5 w-5' />
-                    <span className='ml-1 text-sm md:text-base'>Webサイト</span>
-                  </a>
-                )}
-                {museum.facebook_url && (
-                  <a
-                    href={museum.facebook_url}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-blue-600 hover:text-blue-800'
-                  >
-                    <FaFacebookSquare className='h-6 w-6' />
-                  </a>
-                )}
-                {museum.x_url && (
-                  <a
-                    href={museum.x_url}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-black hover:text-gray-800'
-                  >
-                    <XIcon className='h-5 w-5' />
-                  </a>
-                )}
-                {museum.instagram_url && (
-                  <a
-                    href={museum.instagram_url}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-pink-500 hover:text-pink-700'
-                  >
-                    <FaInstagram className='h-6 w-6' />
-                  </a>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+                {/* リンク表示 */}
+                <div className='flex items-center space-x-3 md:space-x-5 mt-3'>
+                  {museum.url && (
+                    <a
+                      href={museum.url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-blue-600 hover:underline flex items-center'
+                    >
+                      <ArrowTopRightOnSquareIcon className='h-5 w-5' />
+                      <span className='ml-1 text-sm md:text-base'>
+                        Webサイト
+                      </span>
+                    </a>
+                  )}
+                  {museum.facebook_url && (
+                    <a
+                      href={museum.facebook_url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-blue-600 hover:text-blue-800'
+                    >
+                      <FaFacebookSquare className='h-6 w-6' />
+                    </a>
+                  )}
+                  {museum.x_url && (
+                    <a
+                      href={museum.x_url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-black hover:text-gray-800'
+                    >
+                      <XIcon className='h-5 w-5' />
+                    </a>
+                  )}
+                  {museum.instagram_url && (
+                    <a
+                      href={museum.instagram_url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-pink-500 hover:text-pink-700'
+                    >
+                      <FaInstagram className='h-6 w-6' />
+                    </a>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </main>
   );
 }
