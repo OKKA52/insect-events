@@ -6,7 +6,7 @@ import { FaFacebookSquare, FaInstagram } from 'react-icons/fa';
 
 import { supabase } from '@/lib/supabase';
 
-// 🐛 昆虫館テーブル用の型定義
+// 🐛 昆虫館テーブル用の型定義（エリア対応版）
 type Museum = {
   id: number;
   name: string;
@@ -15,6 +15,7 @@ type Museum = {
   facebook_url?: string;
   x_url?: string;
   instagram_url?: string;
+  area?: string; // 👈 エリアを追加
 };
 
 // 本格版 X（旧Twitter）アイコン（SVG）
@@ -49,7 +50,6 @@ export default function HomePage() {
       } else {
         setMuseums(data as Museum[]);
         setFilteredMuseums(data as Museum[]);
-        // console.log('Fetched museums:', data);
       }
 
       setLoadingMuseums(false);
@@ -66,7 +66,8 @@ export default function HomePage() {
       const results = museums.filter(
         (museum) =>
           museum.name.toLowerCase().includes(keyword) ||
-          museum.address.toLowerCase().includes(keyword),
+          museum.address.toLowerCase().includes(keyword) ||
+          (museum.area?.toLowerCase().includes(keyword) ?? false),
       );
       setFilteredMuseums(results);
     }
@@ -83,7 +84,7 @@ export default function HomePage() {
           <div className='flex items-center space-x-2'>
             <input
               type='text'
-              placeholder='施設名や住所で検索'
+              placeholder='施設名や住所、エリアで検索'
               value={searchText}
               onChange={(e) => {
                 const value = e.target.value;
@@ -109,12 +110,45 @@ export default function HomePage() {
                 key={museum.id}
                 className='border p-4 rounded-lg shadow hover:shadow-md transition'
               >
+                {/* 施設名 */}
                 <h2 className='text-lg md:text-xl font-semibold'>
                   {museum.name}
                 </h2>
-                <p className='text-sm md:text-base text-gray-600'>
-                  {museum.address}
-                </p>
+
+                {/* エリアラベル + 住所（横並び） */}
+                <div className='flex items-center space-x-2 mt-1'>
+                  {/* エリアラベル */}
+                  {museum.area && (
+                    <span
+                      className={`inline-block border text-xs md:text-sm font-semibold px-3 py-1 rounded ${
+                        museum.area === '北海道'
+                          ? 'bg-cyan-100 text-cyan-800 border-gray-300'
+                          : museum.area === '東北'
+                            ? 'bg-indigo-100 text-sky-800 border-gray-300'
+                            : museum.area === '関東'
+                              ? 'bg-blue-100 text-blue-800 border-gray-300'
+                              : museum.area === '中部'
+                                ? 'bg-yellow-100 text-teal-800 border-gray-300'
+                                : museum.area === '近畿'
+                                  ? 'bg-green-100 text-green-800 border-gray-300'
+                                  : museum.area === '中国'
+                                    ? 'bg-purple-100 text-lime-800 border-gray-300'
+                                    : museum.area === '四国'
+                                      ? 'bg-orange-100 text-amber-800 border-gray-300'
+                                      : museum.area === '九州'
+                                        ? 'bg-red-100 text-rose-800 border-gray-300'
+                                        : 'bg-gray-100 text-gray-800 border-gray-300'
+                      }`}
+                    >
+                      {museum.area}
+                    </span>
+                  )}
+
+                  {/* 住所 */}
+                  <p className='text-sm md:text-base text-gray-600'>
+                    {museum.address}
+                  </p>
+                </div>
 
                 {/* リンク表示 */}
                 <div className='flex items-center space-x-3 md:space-x-5 mt-3'>
