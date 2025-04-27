@@ -189,7 +189,7 @@ export default function HomePage() {
                 <div className='flex items-center space-x-2 mt-1'>
                   {museum.area && (
                     <span
-                      className={`inline-block border border-gray-300 text-xs md:text-sm font-semibold px-3 py-1 rounded ${
+                      className={`inline-block border border-gray-300 text-xs md:text-sm font-semibold px-3 py-1 rounded self-start ${
                         museum.area === '北海道'
                           ? 'bg-cyan-100 text-cyan-800'
                           : museum.area === '東北'
