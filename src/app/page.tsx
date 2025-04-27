@@ -186,7 +186,7 @@ export default function HomePage() {
                 </h2>
 
                 {/* エリアラベルと住所（横並び） */}
-                <div className='flex items-center space-x-2 mt-1'>
+                <div className='flex items-start space-x-2 mt-1'>
                   {museum.area && (
                     <span
                       className={`inline-block border border-gray-300 text-xs md:text-sm font-semibold px-3 py-1 rounded self-start ${
