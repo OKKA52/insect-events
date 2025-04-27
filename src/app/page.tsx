@@ -15,10 +15,81 @@ type Museum = {
   facebook_url?: string;
   x_url?: string;
   instagram_url?: string;
-  area?: string; // 👈 エリアを追加
+  area?: string;
 };
 
-// 本格版 X（旧Twitter）アイコン（SVG）
+// 都道府県リスト（県番号順）
+const prefectures = [
+  '北海道',
+  '青森県',
+  '岩手県',
+  '宮城県',
+  '秋田県',
+  '山形県',
+  '福島県',
+  '茨城県',
+  '栃木県',
+  '群馬県',
+  '埼玉県',
+  '千葉県',
+  '東京都',
+  '神奈川県',
+  '新潟県',
+  '富山県',
+  '石川県',
+  '福井県',
+  '山梨県',
+  '長野県',
+  '岐阜県',
+  '静岡県',
+  '愛知県',
+  '三重県',
+  '滋賀県',
+  '京都府',
+  '大阪府',
+  '兵庫県',
+  '奈良県',
+  '和歌山県',
+  '鳥取県',
+  '島根県',
+  '岡山県',
+  '広島県',
+  '山口県',
+  '徳島県',
+  '香川県',
+  '愛媛県',
+  '高知県',
+  '福岡県',
+  '佐賀県',
+  '長崎県',
+  '熊本県',
+  '大分県',
+  '宮崎県',
+  '鹿児島県',
+  '沖縄県',
+];
+
+// 都道府県順に並び替える関数
+const sortByPrefecture = (list: Museum[]) => {
+  return [...list].sort((a, b) => {
+    const getPrefecture = (address: string) => {
+      return prefectures.find((pref) => address.startsWith(pref)) ?? '';
+    };
+
+    const prefA = getPrefecture(a.address);
+    const prefB = getPrefecture(b.address);
+
+    const indexA = prefectures.indexOf(prefA);
+    const indexB = prefectures.indexOf(prefB);
+
+    if (indexA !== -1 && indexB !== -1) {
+      return indexA - indexB;
+    } else {
+      return a.address.localeCompare(b.address, 'ja');
+    }
+  });
+};
+
 function XIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -40,10 +111,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetchMuseums = async () => {
-      const { data, error } = await supabase
-        .from('insect_museums')
-        .select('*')
-        .order('name', { ascending: true });
+      const { data, error } = await supabase.from('insect_museums').select('*');
 
       if (error) {
         // console.error('Error fetching museums:', error.message);
@@ -73,6 +141,9 @@ export default function HomePage() {
     }
   };
 
+  // 都道府県順で並び替えたリスト
+  const sortedMuseums = sortByPrefecture(filteredMuseums);
+
   return (
     <main>
       {/* 🧷 Stickyヘッダー */}
@@ -101,50 +172,46 @@ export default function HomePage() {
       <div className='p-6 md:p-8 lg:p-10'>
         {loadingMuseums ? (
           <p>読み込み中...</p>
-        ) : filteredMuseums.length === 0 ? (
+        ) : sortedMuseums.length === 0 ? (
           <p>条件に合う昆虫館が見つかりませんでした。</p>
         ) : (
           <ul className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
-            {filteredMuseums.map((museum) => (
+            {sortedMuseums.map((museum) => (
               <li
                 key={museum.id}
                 className='border p-4 rounded-lg shadow hover:shadow-md transition'
               >
-                {/* 施設名 */}
                 <h2 className='text-lg md:text-xl font-semibold'>
                   {museum.name}
                 </h2>
 
-                {/* エリアラベル + 住所（横並び） */}
+                {/* エリアラベルと住所（横並び） */}
                 <div className='flex items-center space-x-2 mt-1'>
-                  {/* エリアラベル */}
                   {museum.area && (
                     <span
-                      className={`inline-block border text-xs md:text-sm font-semibold px-3 py-1 rounded ${
+                      className={`inline-block border border-gray-300 text-xs md:text-sm font-semibold px-3 py-1 rounded ${
                         museum.area === '北海道'
-                          ? 'bg-cyan-100 text-cyan-800 border-gray-300'
+                          ? 'bg-cyan-100 text-cyan-800'
                           : museum.area === '東北'
-                            ? 'bg-indigo-100 text-sky-800 border-gray-300'
+                            ? 'bg-indigo-100 text-indigo-800'
                             : museum.area === '関東'
-                              ? 'bg-blue-100 text-blue-800 border-gray-300'
+                              ? 'bg-blue-100 text-blue-800'
                               : museum.area === '中部'
-                                ? 'bg-yellow-100 text-teal-800 border-gray-300'
+                                ? 'bg-yellow-100 text-yellow-800'
                                 : museum.area === '近畿'
-                                  ? 'bg-green-100 text-green-800 border-gray-300'
+                                  ? 'bg-green-100 text-green-800'
                                   : museum.area === '中国'
-                                    ? 'bg-purple-100 text-lime-800 border-gray-300'
+                                    ? 'bg-purple-100 text-purple-800'
                                     : museum.area === '四国'
-                                      ? 'bg-orange-100 text-amber-800 border-gray-300'
+                                      ? 'bg-orange-100 text-orange-800'
                                       : museum.area === '九州'
-                                        ? 'bg-red-100 text-rose-800 border-gray-300'
-                                        : 'bg-gray-100 text-gray-800 border-gray-300'
+                                        ? 'bg-red-100 text-red-800'
+                                        : 'bg-gray-100 text-gray-800'
                       }`}
                     >
                       {museum.area}
                     </span>
                   )}
-
-                  {/* 住所 */}
                   <p className='text-sm md:text-base text-gray-600'>
                     {museum.address}
                   </p>
