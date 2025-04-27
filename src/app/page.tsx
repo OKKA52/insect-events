@@ -34,6 +34,8 @@ function XIcon({ className }: { className?: string }) {
 export default function HomePage() {
   const [museums, setMuseums] = useState<Museum[]>([]);
   const [loadingMuseums, setLoadingMuseums] = useState<boolean>(true);
+  const [searchText, setSearchText] = useState<string>('');
+  const [filteredMuseums, setFilteredMuseums] = useState<Museum[]>([]);
 
   useEffect(() => {
     const fetchMuseums = async () => {
@@ -46,6 +48,7 @@ export default function HomePage() {
         // console.error('Error fetching museums:', error.message);
       } else {
         setMuseums(data as Museum[]);
+        setFilteredMuseums(data as Museum[]);
         // console.log('Fetched museums:', data);
       }
 
@@ -55,17 +58,46 @@ export default function HomePage() {
     fetchMuseums();
   }, []);
 
+  const handleSearch = (value: string) => {
+    if (value.trim() === '') {
+      setFilteredMuseums(museums);
+    } else {
+      const keyword = value.toLowerCase();
+      const results = museums.filter(
+        (museum) =>
+          museum.name.toLowerCase().includes(keyword) ||
+          museum.address.toLowerCase().includes(keyword),
+      );
+      setFilteredMuseums(results);
+    }
+  };
+
   return (
     <main className='p-6 md:p-8 lg:p-10'>
       <h1 className='text-2xl md:text-3xl font-bold mb-6'>昆虫館一覧</h1>
 
+      {/* 🔍 リアルタイム検索バー */}
+      <div className='flex items-center space-x-2 mb-6'>
+        <input
+          type='text'
+          placeholder='施設名や住所で検索'
+          value={searchText}
+          onChange={(e) => {
+            const value = e.target.value;
+            setSearchText(value);
+            handleSearch(value);
+          }}
+          className='border rounded p-2 w-full max-w-md'
+        />
+      </div>
+
       {loadingMuseums ? (
         <p>読み込み中...</p>
-      ) : museums.length === 0 ? (
-        <p>昆虫館が登録されていません。</p>
+      ) : filteredMuseums.length === 0 ? (
+        <p>条件に合う昆虫館が見つかりませんでした。</p>
       ) : (
         <ul className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          {museums.map((museum) => (
+          {filteredMuseums.map((museum) => (
             <li
               key={museum.id}
               className='border p-4 rounded-lg shadow hover:shadow-md transition'
