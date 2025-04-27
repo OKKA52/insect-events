@@ -79,7 +79,6 @@ const sortByPrefecture = (list: Museum[]) => {
 
     if (indexA !== -1 && indexB !== -1) {
       if (indexA === indexB) {
-        // 同じ都道府県内ならふりがな順
         return (a.name_kana ?? '').localeCompare(b.name_kana ?? '', 'ja');
       }
       return indexA - indexB;
@@ -89,13 +88,14 @@ const sortByPrefecture = (list: Museum[]) => {
   });
 };
 
+// Xアイコン（SVG）
 function XIcon({ className }: { className?: string }) {
   return (
     <svg
       xmlns='http://www.w3.org/2000/svg'
       viewBox='0 0 1200 1227'
-      className={className}
       fill='currentColor'
+      className={className}
     >
       <path d='M1200 0L741 631l454 596h-269L600 797 287 1227H0l474-640L37 0h269l295 423L913 0z' />
     </svg>
@@ -111,17 +111,12 @@ export default function HomePage() {
   useEffect(() => {
     const fetchMuseums = async () => {
       const { data, error } = await supabase.from('insect_museums').select('*');
-
-      if (error) {
-        // console.error('Error fetching museums:', error.message);
-      } else {
+      if (!error) {
         setMuseums(data as Museum[]);
         setFilteredMuseums(data as Museum[]);
       }
-
       setLoadingMuseums(false);
     };
-
     fetchMuseums();
   }, []);
 
@@ -140,7 +135,6 @@ export default function HomePage() {
     }
   };
 
-  // 都道府県順で並び替えたリスト
   const sortedMuseums = sortByPrefecture(filteredMuseums);
 
   return (
@@ -184,7 +178,7 @@ export default function HomePage() {
                   {museum.name}
                 </h2>
 
-                {/* エリアラベルと住所（横並び） */}
+                {/* エリアラベルと住所 */}
                 <div className='flex items-center space-x-2 mt-1'>
                   {museum.area && (
                     <span
@@ -248,7 +242,9 @@ export default function HomePage() {
                       rel='noopener noreferrer'
                       className='text-black hover:text-gray-800'
                     >
-                      <XIcon className='h-5 w-5' />
+                      <div className='w-6 h-6 border border-gray-400 rounded-md flex items-center justify-center'>
+                        <XIcon className='w-3 h-3' />
+                      </div>
                     </a>
                   )}
                   {museum.instagram_url && (
