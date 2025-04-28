@@ -6,6 +6,10 @@ import { FaFacebookSquare, FaInstagram } from 'react-icons/fa';
 
 import { supabase } from '@/lib/supabase';
 
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
 // 🐛 昆虫館テーブル用の型定義（エリア対応版）
 type Museum = {
   id: number;
@@ -19,7 +23,16 @@ type Museum = {
   name_kana?: string;
   prefecture?: string;
   address_kana?: string;
+  latitude?: number;
+  longitude?: number;
 };
+
+const DefaultIcon = L.icon({
+  iconUrl: '/leaflet/marker-icon.png', // ←パス文字列にする
+  shadowUrl: '/leaflet/marker-shadow.png', // ←パス文字列にする
+  iconAnchor: [12, 41],
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
 // 都道府県リスト（県番号順）
 const prefectures = [
@@ -185,6 +198,38 @@ export default function HomePage() {
             />
           </div>
         </div>
+      </div>
+
+      {/* 🗺️ 昆虫館マップ */}
+      <div className='p-6 md:p-8 lg:p-10'>
+        <h2 className='text-xl font-bold mb-4'>昆虫館マップ</h2>
+        <MapContainer
+          center={[36.2048, 138.2529]} // 日本全体（長野付近中心）
+          zoom={5}
+          scrollWheelZoom={true}
+          style={{ height: '500px', width: '100%' }}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+          />
+          {sortedMuseums.map(
+            (museum) =>
+              museum.latitude &&
+              museum.longitude && (
+                <Marker
+                  key={museum.id}
+                  position={[museum.latitude, museum.longitude]}
+                >
+                  <Popup>
+                    <strong>{museum.name}</strong>
+                    <br />
+                    {museum.address}
+                  </Popup>
+                </Marker>
+              ),
+          )}
+        </MapContainer>
       </div>
 
       {/* 📋 昆虫館リスト */}
