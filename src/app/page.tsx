@@ -137,19 +137,23 @@ export default function HomePage() {
       const keywords = hiraganaKeyword.split(/\s+/);
 
       const results = museums.filter((museum) => {
+        const name = museum.name.toLowerCase();
         const nameKana = katakanaToHiragana(
           museum.name_kana?.toLowerCase() ?? '',
         );
+        const address = museum.address.toLowerCase();
         const addressKana = katakanaToHiragana(
           museum.address_kana?.toLowerCase() ?? '',
         );
-        const area = katakanaToHiragana(museum.area?.toLowerCase() ?? '');
+        const area = museum.area?.toLowerCase() ?? '';
 
         return keywords.every(
           (word) =>
-            nameKana.includes(word) ||
-            addressKana.includes(word) ||
-            area.includes(word),
+            name.includes(word) || // ← 漢字のnameにマッチ
+            nameKana.includes(word) || // ← ひらがなのname_kanaにマッチ
+            address.includes(word) || // ← 漢字のaddressにマッチ
+            addressKana.includes(word) || // ← ひらがなのaddress_kanaにマッチ
+            area.includes(word), // ← areaは漢字なのでそのままマッチ
         );
       });
 
