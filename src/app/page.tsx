@@ -5,10 +5,7 @@ import { useEffect, useState } from 'react';
 import { FaFacebookSquare, FaInstagram } from 'react-icons/fa';
 
 import { supabase } from '@/lib/supabase';
-
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import Map from '@/components/Map'; // ← ここで呼び出すだけ！
 
 // 🐛 昆虫館テーブル用の型定義（エリア対応版）
 type Museum = {
@@ -26,13 +23,6 @@ type Museum = {
   latitude?: number;
   longitude?: number;
 };
-
-const DefaultIcon = L.icon({
-  iconUrl: '/leaflet/marker-icon.png', // ←パス文字列にする
-  shadowUrl: '/leaflet/marker-shadow.png', // ←パス文字列にする
-  iconAnchor: [12, 41],
-});
-L.Marker.prototype.options.icon = DefaultIcon;
 
 // 都道府県リスト（県番号順）
 const prefectures = [
@@ -90,7 +80,6 @@ const sortByPrefecture = (list: Museum[]) => {
   return [...list].sort((a, b) => {
     const indexA = prefectures.indexOf(a.prefecture ?? '');
     const indexB = prefectures.indexOf(b.prefecture ?? '');
-
     if (indexA !== -1 && indexB !== -1) {
       if (indexA === indexB) {
         return (a.name_kana ?? '').localeCompare(b.name_kana ?? '', 'ja');
@@ -162,11 +151,11 @@ export default function HomePage() {
 
         return keywords.every(
           (word) =>
-            name.includes(word) || // ← 漢字のnameにマッチ
-            nameKana.includes(word) || // ← ひらがなのname_kanaにマッチ
-            address.includes(word) || // ← 漢字のaddressにマッチ
-            addressKana.includes(word) || // ← ひらがなのaddress_kanaにマッチ
-            area.includes(word), // ← areaは漢字なのでそのままマッチ
+            name.includes(word) ||
+            nameKana.includes(word) ||
+            address.includes(word) ||
+            addressKana.includes(word) ||
+            area.includes(word),
         );
       });
 
@@ -203,33 +192,7 @@ export default function HomePage() {
       {/* 🗺️ 昆虫館マップ */}
       <div className='p-6 md:p-8 lg:p-10'>
         <h2 className='text-xl font-bold mb-4'>昆虫館マップ</h2>
-        <MapContainer
-          center={[36.2048, 138.2529]} // 日本全体（長野付近中心）
-          zoom={5}
-          scrollWheelZoom={true}
-          style={{ height: '500px', width: '100%' }}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-          />
-          {sortedMuseums.map(
-            (museum) =>
-              museum.latitude &&
-              museum.longitude && (
-                <Marker
-                  key={museum.id}
-                  position={[museum.latitude, museum.longitude]}
-                >
-                  <Popup>
-                    <strong>{museum.name}</strong>
-                    <br />
-                    {museum.address}
-                  </Popup>
-                </Marker>
-              ),
-          )}
-        </MapContainer>
+        <Map museums={sortedMuseums} />
       </div>
 
       {/* 📋 昆虫館リスト */}
