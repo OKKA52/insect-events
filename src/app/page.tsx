@@ -18,6 +18,7 @@ type Museum = {
   area?: string;
   name_kana?: string;
   prefecture?: string;
+  address_kana?: string;
 };
 
 // 都道府県リスト（県番号順）
