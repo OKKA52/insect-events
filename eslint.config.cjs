@@ -10,8 +10,8 @@ const compat = new FlatCompat();
 
 module.exports = [
   ...compat.extends('plugin:@typescript-eslint/recommended'), // ←ここ！個別に呼び出す
-  ...compat.extends('next/core-web-vitals'),                  // ←ここ！
-  ...compat.extends('prettier'),                              // ←ここ！
+  ...compat.extends('next/core-web-vitals'), // ←ここ！
+  ...compat.extends('prettier'), // ←ここ！
   {
     files: ['**/*.ts', '**/*.tsx'],
     ignores: ['node_modules/', '.next/'],
@@ -44,7 +44,7 @@ module.exports = [
     plugins: {
       'simple-import-sort': simpleImportSort,
       'unused-imports': unusedImports,
-      'react': reactPlugin,
+      react: reactPlugin,
     },
     rules: {
       // あなたのカスタムルールここに続けてOK
