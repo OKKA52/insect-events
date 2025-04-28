@@ -6,7 +6,13 @@ import UnstyledLink, {
   UnstyledLinkProps,
 } from '@/components/links/UnstyledLink';
 
-type PrimaryLinkVariant = 'primary' | 'outline' | 'ghost' | 'light' | 'dark';
+type PrimaryLinkVariant =
+  | 'primary'
+  | 'outline'
+  | 'ghost'
+  | 'light'
+  | 'dark'
+  | 'basic';
 type PrimaryLinkProps = {
   variant?: PrimaryLinkVariant;
 } & UnstyledLinkProps;

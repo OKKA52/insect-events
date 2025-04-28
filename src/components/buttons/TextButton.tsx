@@ -2,7 +2,13 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-type TextButtonVariant = 'primary' | 'outline' | 'ghost' | 'light' | 'dark';
+type TextButtonVariant =
+  | 'primary'
+  | 'outline'
+  | 'ghost'
+  | 'light'
+  | 'dark'
+  | 'basic';
 
 type TextButtonProps = {
   variant?: TextButtonVariant;
