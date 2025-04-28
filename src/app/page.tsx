@@ -120,17 +120,38 @@ export default function HomePage() {
     fetchMuseums();
   }, []);
 
+  // カタカナをひらがなに変換する関数
+  const katakanaToHiragana = (str: string) => {
+    return str.replace(/[\u30a1-\u30f6]/g, (match) =>
+      String.fromCharCode(match.charCodeAt(0) - 0x60),
+    );
+  };
+
   const handleSearch = (value: string) => {
     if (value.trim() === '') {
       setFilteredMuseums(museums);
     } else {
       const keyword = value.toLowerCase();
-      const results = museums.filter(
-        (museum) =>
-          museum.name.toLowerCase().includes(keyword) ||
-          museum.address.toLowerCase().includes(keyword) ||
-          (museum.area?.toLowerCase().includes(keyword) ?? false),
-      );
+      const hiraganaKeyword = katakanaToHiragana(keyword);
+      const keywords = hiraganaKeyword.split(/\s+/);
+
+      const results = museums.filter((museum) => {
+        const nameKana = katakanaToHiragana(
+          museum.name_kana?.toLowerCase() ?? '',
+        );
+        const addressKana = katakanaToHiragana(
+          museum.address_kana?.toLowerCase() ?? '',
+        );
+        const area = katakanaToHiragana(museum.area?.toLowerCase() ?? '');
+
+        return keywords.every(
+          (word) =>
+            nameKana.includes(word) ||
+            addressKana.includes(word) ||
+            area.includes(word),
+        );
+      });
+
       setFilteredMuseums(results);
     }
   };
