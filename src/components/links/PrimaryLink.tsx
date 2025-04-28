@@ -6,9 +6,9 @@ import UnstyledLink, {
   UnstyledLinkProps,
 } from '@/components/links/UnstyledLink';
 
-const PrimaryLinkVariant = ['primary', 'basic'] as const;
+type PrimaryLinkVariant = 'primary' | 'outline' | 'ghost' | 'light' | 'dark';
 type PrimaryLinkProps = {
-  variant?: (typeof PrimaryLinkVariant)[number];
+  variant?: PrimaryLinkVariant;
 } & UnstyledLinkProps;
 
 const PrimaryLink = React.forwardRef<HTMLAnchorElement, PrimaryLinkProps>(
@@ -39,5 +39,7 @@ const PrimaryLink = React.forwardRef<HTMLAnchorElement, PrimaryLinkProps>(
     );
   },
 );
+
+PrimaryLink.displayName = 'PrimaryLink';
 
 export default PrimaryLink;

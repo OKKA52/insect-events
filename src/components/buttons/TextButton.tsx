@@ -2,10 +2,10 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-const TextButtonVariant = ['primary', 'basic'] as const;
+type TextButtonVariant = 'primary' | 'outline' | 'ghost' | 'light' | 'dark';
 
 type TextButtonProps = {
-  variant?: (typeof TextButtonVariant)[number];
+  variant?: TextButtonVariant;
 } & React.ComponentPropsWithRef<'button'>;
 
 const TextButton = React.forwardRef<HTMLButtonElement, TextButtonProps>(
@@ -48,5 +48,7 @@ const TextButton = React.forwardRef<HTMLButtonElement, TextButtonProps>(
     );
   },
 );
+
+TextButton.displayName = 'TextButton';
 
 export default TextButton;

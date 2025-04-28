@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
-    "types": [
-      "node",
-      "ws",
-      "@testing-library/jest-dom" // jestの型定義を残している場合
-    ],
-    "target": "esnext", // モダンなJSを使用
+    "types": ["node", "ws", "@testing-library/jest-dom"],
+    "target": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -14,10 +10,10 @@
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node", // 重複していた部分を整理
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve", // ReactのJSXサポート
+    "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
@@ -31,5 +27,5 @@
     ]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", ".next"]
 }

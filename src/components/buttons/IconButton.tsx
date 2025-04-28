@@ -5,18 +5,13 @@ import { ImSpinner2 } from 'react-icons/im';
 
 import { cn } from '@/lib/utils';
 
-const IconButtonVariant = [
-  'primary',
-  'outline',
-  'ghost',
-  'light',
-  'dark',
-] as const;
+// ✅ 修正：const配列をやめてtypeだけにする！
+type IconButtonVariant = 'primary' | 'outline' | 'ghost' | 'light' | 'dark';
 
 type IconButtonProps = {
   isLoading?: boolean;
   isDarkBg?: boolean;
-  variant?: (typeof IconButtonVariant)[number];
+  variant?: IconButtonVariant;
   icon?: IconType | LucideIcon;
   classNames?: {
     icon?: string;
@@ -112,5 +107,7 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
     );
   },
 );
+
+IconButton.displayName = 'IconButton';
 
 export default IconButton;

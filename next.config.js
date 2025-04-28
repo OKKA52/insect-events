@@ -5,17 +5,6 @@ const nextConfig = {
   },
 
   reactStrictMode: true,
-  swcMinify: true,
-
-  // Uncoment to add domain whitelist
-  // images: {
-  //   remotePatterns: [
-  //     {
-  //       protocol: 'https',
-  //       hostname: 'res.cloudinary.com',
-  //     },
-  //   ]
-  // },
 
   webpack(config) {
     // Grab the existing rule that handles SVG imports
@@ -50,4 +39,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

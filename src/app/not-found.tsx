@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Metadata } from 'next';
 import * as React from 'react';
 import { RiAlarmWarningFill } from 'react-icons/ri';
@@ -16,7 +17,7 @@ export default function NotFound() {
             className='drop-shadow-glow animate-flicker text-red-500'
           />
           <h1 className='mt-8 text-4xl md:text-6xl'>Page Not Found</h1>
-          <a href='/'>Back to home</a>
+          <Link href='/' className='mt-4 text-blue-500 underline'></Link>
         </div>
       </section>
     </main>
