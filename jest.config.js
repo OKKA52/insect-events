@@ -1,29 +1,11 @@
-// jest.config.js
-const nextJest = require('next/jest');
-
-// next/jestの設定を取得
-const createJestConfig = nextJest({
-  dir: './', // Next.jsプロジェクトのルートディレクトリを指定
-});
-
-// カスタムのJest設定
-const customJestConfig = {
-  // テスト環境を設定
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  moduleDirectories: ['node_modules', '<rootDir>/'],
-  testEnvironment: 'jest-environment-jsdom',
-
-  // モジュール名マッピング (エイリアスの設定)
+module.exports = {
+  testEnvironment: 'jsdom',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    '^~/(.*)$': '<rootDir>/public/$1',
-    '^.+\\.(svg)$': '<rootDir>/src/__mocks__/svg.tsx',
   },
   transform: {
-    '^.+\\.tsx?$': 'ts-jest', // TypeScriptファイルをts-jestで変換
-    '^.+\\.js$': 'babel-jest', // JavaScriptファイルをbabel-jestで変換
+    '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
   },
+  setupFiles: ['<rootDir>/jest.setup.ts'], // これは環境変数用
+  setupFilesAfterEnv: ['@testing-library/jest-dom'], // 👈 これ追加！
 };
-
-// Jest設定をエクスポート
-module.exports = createJestConfig(customJestConfig);
