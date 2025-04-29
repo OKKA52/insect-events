@@ -39,7 +39,7 @@ const Marker = dynamic(
 const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
   ssr: false,
 });
-
+// 地図コンポーネント
 export default function Map({
   museums,
   onHoverMuseum,
