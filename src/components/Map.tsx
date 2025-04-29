@@ -90,7 +90,7 @@ export default function Map({
               },
             }}
           >
-            <Popup maxWidth={300} minWidth={200}>
+            <Popup maxWidth={300} minWidth={200} offset={[0, -30]}>
               <div className='text-sm'>
                 {museum.image_url && (
                   <div className='w-full h-32 relative rounded mb-2 overflow-hidden'>
