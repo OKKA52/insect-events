@@ -110,6 +110,13 @@ export default function HomePage() {
   const [hoveredMuseumId, setHoveredMuseumId] = useState<number | null>(null);
   const [clickedMuseumId, setClickedMuseumId] = useState<number | null>(null);
   const museumRefs = useRef<Record<number, HTMLLIElement | null>>({});
+  const [resetKey, setResetKey] = useState(0); // 地図リセット用
+  const handleClear = () => {
+    setSearchText('');
+    setFilteredMuseums(museums);
+    setClickedMuseumId(null);
+    setResetKey((prev) => prev + 1);
+  };
 
   useEffect(() => {
     const fetchMuseums = async () => {
@@ -193,6 +200,14 @@ export default function HomePage() {
               }}
               className='border rounded p-2 w-full max-w-md'
             />
+            {/* クリアボタンを追加 */}
+            <button
+              //onClick={handleClear}
+              onClick={handleClear}
+              className='ml-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm'
+            >
+              クリア
+            </button>
             <span className='text-sm text-gray-600 whitespace-nowrap'>
               {filteredMuseums.length} 件
             </span>
@@ -203,6 +218,7 @@ export default function HomePage() {
       <div className='relative z-0 p-6 md:p-8 lg:p-10'>
         <h2 className='text-xl font-bold mb-4'>昆虫館マップ</h2>
         <Map
+          key={resetKey}
           museums={sortedMuseums}
           onHoverMuseum={setHoveredMuseumId}
           onClickMuseum={setClickedMuseumId}

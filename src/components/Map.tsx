@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import 'leaflet/dist/leaflet.css';
+import MapController from './MapController';
 
 type Museum = {
   id: number;
@@ -22,6 +23,7 @@ type MapProps = {
   museums: Museum[];
   onHoverMuseum: (_id: number | null) => void;
   onClickMuseum: (_id: number) => void;
+  resetKey?: number;
 };
 
 const MapContainer = dynamic(
@@ -39,11 +41,12 @@ const Marker = dynamic(
 const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
   ssr: false,
 });
-// 地図コンポーネントです
+
 export default function Map({
   museums,
   onHoverMuseum,
   onClickMuseum,
+  resetKey,
 }: MapProps) {
   useEffect(() => {
     import('leaflet').then((L) => {
@@ -58,11 +61,13 @@ export default function Map({
 
   return (
     <MapContainer
+      key={resetKey}
       center={[36.2048, 138.2529]}
       zoom={5}
       scrollWheelZoom={true}
       style={{ height: '500px', width: '100%' }}
     >
+      <MapController resetKey={resetKey ?? 0} />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
