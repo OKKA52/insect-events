@@ -9,9 +9,11 @@ const reactPlugin = require('eslint-plugin-react');
 const compat = new FlatCompat();
 
 module.exports = [
-  ...compat.extends('plugin:@typescript-eslint/recommended'), // ←ここ！個別に呼び出す
-  ...compat.extends('next/core-web-vitals'), // ←ここ！
-  ...compat.extends('prettier'), // ←ここ！
+  ...compat.extends('plugin:@typescript-eslint/recommended'),
+  ...compat.extends('next/core-web-vitals'),
+  ...compat.extends('prettier'),
+
+  // TypeScript用の設定本体（plugins, parser等）
   {
     files: ['**/*.ts', '**/*.tsx'],
     ignores: ['node_modules/', '.next/'],
@@ -47,8 +49,15 @@ module.exports = [
       react: reactPlugin,
     },
     rules: {
-      // あなたのカスタムルールここに続けてOK
+      // 他のルール（ここでは警告される）
     },
   },
-  js.configs.recommended,
+
+  // ⚠️ 最後にルール上書き専用オブジェクトを追加！
+  {
+    rules: {
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    },
+  },
 ];

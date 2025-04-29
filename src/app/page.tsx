@@ -1,13 +1,12 @@
 'use client';
 
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import { useEffect, useState } from 'react';
 import { FaFacebookSquare, FaInstagram } from 'react-icons/fa';
+import { useEffect, useRef, useState } from 'react';
 
 import { supabase } from '@/lib/supabase';
-import Map from '@/components/Map'; // ← ここで呼び出すだけ！
+import Map from '@/components/Map';
 
-// 🐛 昆虫館テーブル用の型定義（エリア対応版）
 type Museum = {
   id: number;
   name: string;
@@ -16,6 +15,7 @@ type Museum = {
   facebook_url?: string;
   x_url?: string;
   instagram_url?: string;
+  image_url?: string;
   area?: string;
   name_kana?: string;
   prefecture?: string;
@@ -24,7 +24,6 @@ type Museum = {
   longitude?: number;
 };
 
-// 都道府県リスト（県番号順）
 const prefectures = [
   '北海道',
   '青森県',
@@ -75,7 +74,6 @@ const prefectures = [
   '沖縄県',
 ];
 
-// 都道府県順に並び替える関数
 const sortByPrefecture = (list: Museum[]) => {
   return [...list].sort((a, b) => {
     const indexA = prefectures.indexOf(a.prefecture ?? '');
@@ -91,7 +89,6 @@ const sortByPrefecture = (list: Museum[]) => {
   });
 };
 
-// Xアイコン（SVG）
 function XIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -110,6 +107,9 @@ export default function HomePage() {
   const [loadingMuseums, setLoadingMuseums] = useState<boolean>(true);
   const [searchText, setSearchText] = useState<string>('');
   const [filteredMuseums, setFilteredMuseums] = useState<Museum[]>([]);
+  const [hoveredMuseumId, setHoveredMuseumId] = useState<number | null>(null);
+  const [clickedMuseumId, setClickedMuseumId] = useState<number | null>(null);
+  const museumRefs = useRef<Record<number, HTMLLIElement | null>>({});
 
   useEffect(() => {
     const fetchMuseums = async () => {
@@ -123,7 +123,18 @@ export default function HomePage() {
     fetchMuseums();
   }, []);
 
-  // カタカナをひらがなに変換する関数
+  useEffect(() => {
+    if (clickedMuseumId !== null) {
+      const target = museumRefs.current[clickedMuseumId];
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+    }
+  }, [clickedMuseumId]);
+
   const katakanaToHiragana = (str: string) => {
     return str.replace(/[\u30a1-\u30f6]/g, (match) =>
       String.fromCharCode(match.charCodeAt(0) - 0x60),
@@ -167,12 +178,9 @@ export default function HomePage() {
 
   return (
     <main>
-      {/* 🧷 Stickyヘッダー */}
       <div className='sticky top-0 bg-white z-10 shadow'>
         <div className='p-6 md:p-8 lg:p-10'>
           <h1 className='text-2xl md:text-3xl font-bold mb-4'>昆虫館一覧</h1>
-
-          {/* 🔍 リアルタイム検索バー */}
           <div className='flex items-center space-x-6'>
             <input
               type='text'
@@ -192,13 +200,15 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 🗺️ 昆虫館マップ */}
       <div className='relative z-0 p-6 md:p-8 lg:p-10'>
         <h2 className='text-xl font-bold mb-4'>昆虫館マップ</h2>
-        <Map museums={sortedMuseums} />
+        <Map
+          museums={sortedMuseums}
+          onHoverMuseum={setHoveredMuseumId}
+          onClickMuseum={setClickedMuseumId}
+        />
       </div>
 
-      {/* 📋 昆虫館リスト */}
       <div className='p-6 md:p-8 lg:p-10'>
         {loadingMuseums ? (
           <p>読み込み中...</p>
@@ -209,13 +219,18 @@ export default function HomePage() {
             {sortedMuseums.map((museum) => (
               <li
                 key={museum.id}
-                className='border p-4 rounded-lg shadow hover:shadow-md transition'
+                ref={(el) => {
+                  museumRefs.current[museum.id] = el;
+                }}
+                className={`border p-4 rounded-lg shadow transition ${
+                  hoveredMuseumId === museum.id
+                    ? 'bg-yellow-100'
+                    : 'hover:shadow-md'
+                }`}
               >
                 <h2 className='text-lg md:text-xl font-semibold'>
                   {museum.name}
                 </h2>
-
-                {/* エリアラベルと住所 */}
                 <div className='flex items-center space-x-2 mt-1'>
                   {museum.area && (
                     <span
@@ -246,8 +261,6 @@ export default function HomePage() {
                     {museum.address}
                   </p>
                 </div>
-
-                {/* リンク表示 */}
                 <div className='flex items-center space-x-3 md:space-x-5 mt-3'>
                   {museum.url && (
                     <a
@@ -267,7 +280,7 @@ export default function HomePage() {
                       href={museum.facebook_url}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='text-blue-600 hover:text-blue-800'
+                      className='text-blue-600'
                     >
                       <FaFacebookSquare className='h-6 w-6' />
                     </a>
@@ -277,7 +290,7 @@ export default function HomePage() {
                       href={museum.x_url}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='text-black hover:text-gray-800'
+                      className='text-black'
                     >
                       <div className='w-6 h-6 border border-gray-400 rounded-md flex items-center justify-center'>
                         <XIcon className='w-3 h-3' />
@@ -289,7 +302,7 @@ export default function HomePage() {
                       href={museum.instagram_url}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='text-pink-500 hover:text-pink-700'
+                      className='text-pink-500'
                     >
                       <FaInstagram className='h-6 w-6' />
                     </a>

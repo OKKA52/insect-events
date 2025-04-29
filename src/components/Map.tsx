@@ -2,18 +2,28 @@
 
 import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import 'leaflet/dist/leaflet.css';
 
-// Museum型定義
 type Museum = {
   id: number;
   name: string;
   address: string;
   latitude?: number;
   longitude?: number;
+  url?: string;
+  instagram_url?: string;
+  facebook_url?: string;
+  x_url?: string;
+  image_url?: string;
 };
 
-// Leafletコンポーネントを動的import
+type MapProps = {
+  museums: Museum[];
+  onHoverMuseum: (_id: number | null) => void;
+  onClickMuseum: (_id: number) => void;
+};
+
 const MapContainer = dynamic(
   () => import('react-leaflet').then((mod) => mod.MapContainer),
   { ssr: false },
@@ -30,7 +40,11 @@ const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
   ssr: false,
 });
 
-export default function Map({ museums }: { museums: Museum[] }) {
+export default function Map({
+  museums,
+  onHoverMuseum,
+  onClickMuseum,
+}: MapProps) {
   useEffect(() => {
     import('leaflet').then((L) => {
       const DefaultIcon = L.icon({
@@ -53,20 +67,85 @@ export default function Map({ museums }: { museums: Museum[] }) {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
       />
-      {museums.map((museum) =>
-        museum.latitude && museum.longitude ? (
+
+      {museums.map((museum) => {
+        if (!museum.latitude || !museum.longitude) return null;
+
+        return (
           <Marker
             key={museum.id}
             position={[museum.latitude, museum.longitude]}
+            eventHandlers={{
+              mouseover: (e) => {
+                e.target.openPopup();
+                onHoverMuseum(museum.id);
+              },
+              click: () => {
+                onClickMuseum(museum.id);
+              },
+            }}
           >
-            <Popup>
-              <strong>{museum.name}</strong>
-              <br />
-              {museum.address}
+            <Popup maxWidth={300} minWidth={200}>
+              <div className='text-sm'>
+                {museum.image_url && (
+                  <div className='w-full h-32 relative rounded mb-2 overflow-hidden'>
+                    <Image
+                      src={museum.image_url}
+                      alt={museum.name}
+                      fill
+                      style={{ objectFit: 'cover' }}
+                    />
+                  </div>
+                )}
+                <h3 className='text-base font-bold mb-1'>{museum.name}</h3>
+                <p className='text-gray-600 mb-2'>{museum.address}</p>
+                <div className='flex flex-wrap gap-2 text-xs'>
+                  {museum.url && (
+                    <a
+                      href={museum.url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-blue-600 underline'
+                    >
+                      Webサイト
+                    </a>
+                  )}
+                  {museum.instagram_url && (
+                    <a
+                      href={museum.instagram_url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-pink-500'
+                    >
+                      Instagram
+                    </a>
+                  )}
+                  {museum.facebook_url && (
+                    <a
+                      href={museum.facebook_url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-blue-700'
+                    >
+                      Facebook
+                    </a>
+                  )}
+                  {museum.x_url && (
+                    <a
+                      href={museum.x_url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-black'
+                    >
+                      X
+                    </a>
+                  )}
+                </div>
+              </div>
             </Popup>
           </Marker>
-        ) : null,
-      )}
+        );
+      })}
     </MapContainer>
   );
 }
