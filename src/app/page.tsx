@@ -173,7 +173,7 @@ export default function HomePage() {
           <h1 className='text-2xl md:text-3xl font-bold mb-4'>昆虫館一覧</h1>
 
           {/* 🔍 リアルタイム検索バー */}
-          <div className='flex items-center space-x-2'>
+          <div className='flex items-center space-x-6'>
             <input
               type='text'
               placeholder='施設名や住所、エリアで検索'
@@ -185,6 +185,9 @@ export default function HomePage() {
               }}
               className='border rounded p-2 w-full max-w-md'
             />
+            <span className='text-sm text-gray-600 whitespace-nowrap'>
+              {filteredMuseums.length} 件
+            </span>
           </div>
         </div>
       </div>
