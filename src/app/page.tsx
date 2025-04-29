@@ -190,7 +190,7 @@ export default function HomePage() {
       </div>
 
       {/* 🗺️ 昆虫館マップ */}
-      <div className='p-6 md:p-8 lg:p-10'>
+      <div className='relative z-0 p-6 md:p-8 lg:p-10'>
         <h2 className='text-xl font-bold mb-4'>昆虫館マップ</h2>
         <Map museums={sortedMuseums} />
       </div>
