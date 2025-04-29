@@ -204,7 +204,7 @@ export default function HomePage() {
             <button
               //onClick={handleClear}
               onClick={handleClear}
-              className='px-4 h-10 bg-blue-500 text-white rounded hover:bg-blue-600'
+              className='px-4 h-10 bg-blue-500 text-white rounded hover:bg-blue-600 whitespace-nowrap text-sm'
             >
               クリア
             </button>
