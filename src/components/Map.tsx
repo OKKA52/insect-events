@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import MapController from './MapController';
 
 type Museum = {
@@ -82,8 +83,26 @@ export default function Map({
             position={[museum.latitude, museum.longitude]}
             eventHandlers={{
               mouseover: (e) => {
+                e.target.setIcon(
+                  L.icon({
+                    iconUrl: '/leaflet/marker-icon-red.png',
+                    shadowUrl: '/leaflet/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                  }),
+                );
                 e.target.openPopup();
                 onHoverMuseum(museum.id);
+              },
+              mouseout: (e) => {
+                e.target.setIcon(
+                  L.icon({
+                    iconUrl: '/leaflet/marker-icon.png',
+                    shadowUrl: '/leaflet/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                  }),
+                );
               },
               click: () => {
                 onClickMuseum(museum.id);
