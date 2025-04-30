@@ -115,8 +115,8 @@ export default function HomePage() {
   const [resetKey, setResetKey] = useState(0);
   const museumRefs = useRef<Record<number, HTMLLIElement | null>>({});
   const mapRef = useRef<HTMLDivElement | null>(null);
-
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [mapZoomLevel, setMapZoomLevel] = useState(5);
 
   const handleClear = () => {
     setSearchText('');
@@ -124,6 +124,7 @@ export default function HomePage() {
     setClickedMuseumId(null);
     setHoveredMuseumId(null);
     setResetKey((prev) => prev + 1);
+    setMapZoomLevel(5);
 
     setTimeout(() => {
       const el = mapRef.current;
@@ -168,40 +169,58 @@ export default function HomePage() {
   }, []);
 
   const katakanaToHiragana = (str: string) =>
-    str.replace(/[\u30a1-\u30f6]/g, (match) =>
+    str.replace(/[ァ-ヶ]/g, (match) =>
       String.fromCharCode(match.charCodeAt(0) - 0x60),
     );
 
   const handleSearch = (value: string) => {
+    setSearchText(value);
+
     if (value.trim() === '') {
       setFilteredMuseums(museums);
+      setMapZoomLevel(5);
+      return;
+    }
+
+    const keyword = katakanaToHiragana(value.toLowerCase());
+    const keywords = keyword.split(/\s+/);
+
+    const results = museums.filter((museum) => {
+      const name = museum.name.toLowerCase();
+      const nameKana = katakanaToHiragana(
+        museum.name_kana?.toLowerCase() ?? '',
+      );
+      const address = museum.address.toLowerCase();
+      const addressKana = katakanaToHiragana(
+        museum.address_kana?.toLowerCase() ?? '',
+      );
+      const area = museum.area?.toLowerCase() ?? '';
+      const pref = museum.prefecture?.toLowerCase() ?? '';
+
+      return keywords.every(
+        (word) =>
+          name.includes(word) ||
+          nameKana.includes(word) ||
+          address.includes(word) ||
+          addressKana.includes(word) ||
+          area.includes(word) ||
+          pref.includes(word),
+      );
+    });
+
+    setFilteredMuseums(results);
+
+    const matchedPref = museums.find(
+      (m) => m.prefecture?.toLowerCase() === keyword,
+    );
+    const matchedArea = museums.find((m) => m.area?.toLowerCase() === keyword);
+
+    if (matchedPref) {
+      setMapZoomLevel(9);
+    } else if (matchedArea) {
+      setMapZoomLevel(7);
     } else {
-      const keyword = value.toLowerCase();
-      const hiraganaKeyword = katakanaToHiragana(keyword);
-      const keywords = hiraganaKeyword.split(/\s+/);
-
-      const results = museums.filter((museum) => {
-        const name = museum.name.toLowerCase();
-        const nameKana = katakanaToHiragana(
-          museum.name_kana?.toLowerCase() ?? '',
-        );
-        const address = museum.address.toLowerCase();
-        const addressKana = katakanaToHiragana(
-          museum.address_kana?.toLowerCase() ?? '',
-        );
-        const area = museum.area?.toLowerCase() ?? '';
-
-        return keywords.every(
-          (word) =>
-            name.includes(word) ||
-            nameKana.includes(word) ||
-            address.includes(word) ||
-            addressKana.includes(word) ||
-            area.includes(word),
-        );
-      });
-
-      setFilteredMuseums(results);
+      setMapZoomLevel(7);
     }
   };
 
@@ -209,7 +228,6 @@ export default function HomePage() {
 
   return (
     <main>
-      {/* ヘッダー */}
       <div className='sticky top-0 bg-white z-10 shadow'>
         <div className='p-6 md:p-8 lg:p-10'>
           <h1 className='text-2xl md:text-3xl font-bold mb-4'>昆虫館一覧</h1>
@@ -218,11 +236,7 @@ export default function HomePage() {
               type='text'
               placeholder='施設名や住所、エリアで検索'
               value={searchText}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSearchText(value);
-                handleSearch(value);
-              }}
+              onChange={(e) => handleSearch(e.target.value)}
               className='border rounded p-2 w-full max-w-md'
             />
             <button
@@ -238,7 +252,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 地図 */}
       <div className='relative z-0 p-6 md:p-8 lg:p-10'>
         <div ref={mapRef} />
         <h2 className='text-xl font-bold mb-4'>昆虫館マップ</h2>
@@ -247,10 +260,11 @@ export default function HomePage() {
           museums={sortedMuseums}
           onHoverMuseum={setHoveredMuseumId}
           onClickMuseum={setClickedMuseumId}
+          zoomLevel={mapZoomLevel}
         />
       </div>
 
-      {/* リスト */}
+      {/* 昆虫館リスト */}
       <div className='p-6 md:p-8 lg:p-10'>
         {loadingMuseums ? (
           <p>読み込み中...</p>
@@ -336,7 +350,6 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* ✅ スクロールアップボタン */}
       {showScrollTop && (
         <button
           onClick={scrollToTop}

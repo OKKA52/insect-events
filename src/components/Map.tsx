@@ -23,8 +23,10 @@ type MapProps = {
   onHoverMuseum: (_id: number | null) => void;
   onClickMuseum: (_id: number) => void;
   resetKey?: number;
+  zoomLevel?: number; // ← ★ 追加
 };
 
+// 動的インポート
 const MapContainer = dynamic(
   () => import('react-leaflet').then((mod) => mod.MapContainer),
   { ssr: false },
@@ -40,12 +42,14 @@ const Marker = dynamic(
 const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
   ssr: false,
 });
+const MapController = dynamic(() => import('./MapController'), { ssr: false }); // ← MapController
 
 export default function Map({
   museums,
   onHoverMuseum,
   onClickMuseum,
   resetKey,
+  zoomLevel = 7, // ← デフォルト値
 }: MapProps) {
   const [lastTappedMarkerId, setLastTappedMarkerId] = useState<number | null>(
     null,
@@ -67,11 +71,17 @@ export default function Map({
   return (
     <MapContainer
       key={resetKey}
-      center={[36.2048, 138.2529]}
+      center={[36.2048, 138.2529]} // 日本の中心
       zoom={5}
       scrollWheelZoom={true}
       style={{ height: '500px', width: '100%' }}
     >
+      <MapController
+        museums={museums}
+        resetKey={resetKey ?? 0}
+        zoomLevel={zoomLevel}
+      />
+
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
@@ -115,18 +125,17 @@ export default function Map({
               },
               click: (e) => {
                 if (isMobile) {
-                  // スマホ → 1回目でPopup表示、2回目で遷移
                   if (lastTappedMarkerId === museum.id) {
                     onHoverMuseum(museum.id);
                     onClickMuseum(museum.id);
                     setLastTappedMarkerId(null);
                   } else {
                     setLastTappedMarkerId(museum.id);
-                    e.target.openPopup(); // 吹き出しを開く
+                    e.target.openPopup();
                   }
                 } else {
                   onHoverMuseum(museum.id);
-                  onClickMuseum(museum.id); // PCは即遷移
+                  onClickMuseum(museum.id);
                 }
               },
             }}
