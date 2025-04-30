@@ -117,6 +117,7 @@ export default function Map({
                 if (isMobile) {
                   // スマホ → 1回目でPopup表示、2回目で遷移
                   if (lastTappedMarkerId === museum.id) {
+                    onHoverMuseum(museum.id);
                     onClickMuseum(museum.id);
                     setLastTappedMarkerId(null);
                   } else {
@@ -124,6 +125,7 @@ export default function Map({
                     e.target.openPopup(); // 吹き出しを開く
                   }
                 } else {
+                  onHoverMuseum(museum.id);
                   onClickMuseum(museum.id); // PCは即遷移
                 }
               },
