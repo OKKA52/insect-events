@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import 'leaflet/dist/leaflet.css';
-import MapController from './MapController';
 
 type Museum = {
   id: number;
@@ -48,6 +47,11 @@ export default function Map({
   onClickMuseum,
   resetKey,
 }: MapProps) {
+  const [lastTappedMarkerId, setLastTappedMarkerId] = useState<number | null>(
+    null,
+  );
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
   useEffect(() => {
     import('leaflet').then((L) => {
       const DefaultIcon = L.icon({
@@ -68,7 +72,6 @@ export default function Map({
       scrollWheelZoom={true}
       style={{ height: '500px', width: '100%' }}
     >
-      <MapController resetKey={resetKey ?? 0} />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
@@ -83,31 +86,46 @@ export default function Map({
             position={[museum.latitude, museum.longitude]}
             eventHandlers={{
               mouseover: async (e) => {
-                const L = await import('leaflet');
-                e.target.setIcon(
-                  L.icon({
-                    iconUrl: '/leaflet/marker-icon-red.png',
-                    shadowUrl: '/leaflet/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                  }),
-                );
-                e.target.openPopup();
-                onHoverMuseum(museum.id);
+                if (!isMobile) {
+                  const L = await import('leaflet');
+                  e.target.setIcon(
+                    L.icon({
+                      iconUrl: '/leaflet/marker-icon-red.png',
+                      shadowUrl: '/leaflet/marker-shadow.png',
+                      iconSize: [25, 41],
+                      iconAnchor: [12, 41],
+                    }),
+                  );
+                  e.target.openPopup();
+                  onHoverMuseum(museum.id);
+                }
               },
               mouseout: async (e) => {
-                const L = await import('leaflet');
-                e.target.setIcon(
-                  L.icon({
-                    iconUrl: '/leaflet/marker-icon.png',
-                    shadowUrl: '/leaflet/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                  }),
-                );
+                if (!isMobile) {
+                  const L = await import('leaflet');
+                  e.target.setIcon(
+                    L.icon({
+                      iconUrl: '/leaflet/marker-icon.png',
+                      shadowUrl: '/leaflet/marker-shadow.png',
+                      iconSize: [25, 41],
+                      iconAnchor: [12, 41],
+                    }),
+                  );
+                }
               },
-              click: () => {
-                onClickMuseum(museum.id);
+              click: (e) => {
+                if (isMobile) {
+                  // スマホ → 1回目でPopup表示、2回目で遷移
+                  if (lastTappedMarkerId === museum.id) {
+                    onClickMuseum(museum.id);
+                    setLastTappedMarkerId(null);
+                  } else {
+                    setLastTappedMarkerId(museum.id);
+                    e.target.openPopup(); // 吹き出しを開く
+                  }
+                } else {
+                  onClickMuseum(museum.id); // PCは即遷移
+                }
               },
             }}
           >
