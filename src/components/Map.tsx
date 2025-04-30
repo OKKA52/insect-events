@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 import MapController from './MapController';
 
 type Museum = {
@@ -54,6 +53,7 @@ export default function Map({
       const DefaultIcon = L.icon({
         iconUrl: '/leaflet/marker-icon.png',
         shadowUrl: '/leaflet/marker-shadow.png',
+        iconSize: [25, 41],
         iconAnchor: [12, 41],
       });
       L.Marker.prototype.options.icon = DefaultIcon;
@@ -82,7 +82,8 @@ export default function Map({
             key={museum.id}
             position={[museum.latitude, museum.longitude]}
             eventHandlers={{
-              mouseover: (e) => {
+              mouseover: async (e) => {
+                const L = await import('leaflet');
                 e.target.setIcon(
                   L.icon({
                     iconUrl: '/leaflet/marker-icon-red.png',
@@ -94,7 +95,8 @@ export default function Map({
                 e.target.openPopup();
                 onHoverMuseum(museum.id);
               },
-              mouseout: (e) => {
+              mouseout: async (e) => {
+                const L = await import('leaflet');
                 e.target.setIcon(
                   L.icon({
                     iconUrl: '/leaflet/marker-icon.png',
