@@ -104,19 +104,30 @@ function XIcon({ className }: { className?: string }) {
 
 export default function HomePage() {
   const [museums, setMuseums] = useState<Museum[]>([]);
-  const [loadingMuseums, setLoadingMuseums] = useState<boolean>(true);
-  const [searchText, setSearchText] = useState<string>('');
+  const [loadingMuseums, setLoadingMuseums] = useState(true);
+  const [searchText, setSearchText] = useState('');
   const [filteredMuseums, setFilteredMuseums] = useState<Museum[]>([]);
   const [hoveredMuseumId, setHoveredMuseumId] = useState<number | null>(null);
   const [clickedMuseumId, setClickedMuseumId] = useState<number | null>(null);
   const museumRefs = useRef<Record<number, HTMLLIElement | null>>({});
-  const [resetKey, setResetKey] = useState(0); // 地図リセット用
+  const [resetKey, setResetKey] = useState(0);
+  const mapRef = useRef<HTMLDivElement | null>(null); // ✅ スクロール用の地図位置
+
   const handleClear = () => {
     setSearchText('');
     setFilteredMuseums(museums);
     setClickedMuseumId(null);
     setHoveredMuseumId(null);
     setResetKey((prev) => prev + 1);
+
+    // ✅ 強制スクロール（sticky header考慮）
+    setTimeout(() => {
+      const el = mapRef.current;
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.scrollY - 220;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   useEffect(() => {
@@ -135,19 +146,15 @@ export default function HomePage() {
     if (clickedMuseumId !== null) {
       const target = museumRefs.current[clickedMuseumId];
       if (target) {
-        target.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
   }, [clickedMuseumId]);
 
-  const katakanaToHiragana = (str: string) => {
-    return str.replace(/[\u30a1-\u30f6]/g, (match) =>
+  const katakanaToHiragana = (str: string) =>
+    str.replace(/[\u30a1-\u30f6]/g, (match) =>
       String.fromCharCode(match.charCodeAt(0) - 0x60),
     );
-  };
 
   const handleSearch = (value: string) => {
     if (value.trim() === '') {
@@ -186,6 +193,7 @@ export default function HomePage() {
 
   return (
     <main>
+      {/* ヘッダー・検索 */}
       <div className='sticky top-0 bg-white z-10 shadow'>
         <div className='p-6 md:p-8 lg:p-10'>
           <h1 className='text-2xl md:text-3xl font-bold mb-4'>昆虫館一覧</h1>
@@ -201,9 +209,7 @@ export default function HomePage() {
               }}
               className='border rounded p-2 w-full max-w-md'
             />
-            {/* クリアボタンを追加 */}
             <button
-              //onClick={handleClear}
               onClick={handleClear}
               className='px-4 h-10 bg-blue-500 text-white rounded hover:bg-blue-600 whitespace-nowrap text-sm'
             >
@@ -216,7 +222,9 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* 地図セクション */}
       <div className='relative z-0 p-6 md:p-8 lg:p-10'>
+        <div ref={mapRef} /> {/* ✅ スクロールターゲット */}
         <h2 className='text-xl font-bold mb-4'>昆虫館マップ</h2>
         <Map
           key={resetKey}
@@ -226,6 +234,7 @@ export default function HomePage() {
         />
       </div>
 
+      {/* 昆虫館リスト */}
       <div className='p-6 md:p-8 lg:p-10'>
         {loadingMuseums ? (
           <p>読み込み中...</p>
@@ -250,27 +259,7 @@ export default function HomePage() {
                 </h2>
                 <div className='flex items-center space-x-2 mt-1'>
                   {museum.area && (
-                    <span
-                      className={`inline-block border border-gray-300 text-xs md:text-sm font-semibold px-3 py-1 rounded self-start shrink-0 ${
-                        museum.area === '北海道'
-                          ? 'bg-cyan-100 text-cyan-800'
-                          : museum.area === '東北'
-                            ? 'bg-indigo-100 text-indigo-800'
-                            : museum.area === '関東'
-                              ? 'bg-blue-100 text-blue-800'
-                              : museum.area === '中部'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : museum.area === '近畿'
-                                  ? 'bg-green-100 text-green-800'
-                                  : museum.area === '中国'
-                                    ? 'bg-purple-100 text-purple-800'
-                                    : museum.area === '四国'
-                                      ? 'bg-orange-100 text-orange-800'
-                                      : museum.area === '九州'
-                                        ? 'bg-red-100 text-red-800'
-                                        : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
+                    <span className='inline-block border border-gray-300 text-xs md:text-sm font-semibold px-3 py-1 rounded self-start shrink-0 bg-gray-100 text-gray-800'>
                       {museum.area}
                     </span>
                   )}
