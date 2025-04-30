@@ -25,6 +25,8 @@ type Museum = {
   address_kana?: string;
   latitude?: number;
   longitude?: number;
+  area_kana?: string;
+  prefecture_kana?: string;
 };
 
 const prefectures = [
@@ -116,7 +118,68 @@ export default function HomePage() {
   const museumRefs = useRef<Record<number, HTMLLIElement | null>>({});
   const mapRef = useRef<HTMLDivElement | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [mapZoomLevel, setMapZoomLevel] = useState(5);
+
+  const katakanaToHiragana = (str: string) =>
+    str.replace(/[ァ-ヶ]/g, (match) =>
+      String.fromCharCode(match.charCodeAt(0) - 0x60),
+    );
+
+  const handleSearch = (value: string) => {
+    setSearchText(value);
+
+    const keyword = katakanaToHiragana(value.toLowerCase().trim());
+    const keywords = keyword.split(/\s+/);
+
+    // 空欄の場合はリセット
+    if (keyword === '') {
+      setFilteredMuseums(museums);
+      return;
+    }
+
+    const results = museums.filter((museum) => {
+      const name = museum.name.toLowerCase();
+      const nameKana = katakanaToHiragana(
+        museum.name_kana?.toLowerCase() ?? '',
+      );
+      const address = museum.address.toLowerCase();
+      const addressKana = katakanaToHiragana(
+        museum.address_kana?.toLowerCase() ?? '',
+      );
+      const area = museum.area?.toLowerCase() ?? '';
+      const areaKana = katakanaToHiragana(
+        museum.area_kana?.toLowerCase() ?? '',
+      );
+      const pref = museum.prefecture?.toLowerCase() ?? '';
+      const prefKana = katakanaToHiragana(
+        museum.prefecture_kana?.toLowerCase() ?? '',
+      );
+
+      return keywords.every(
+        (word) =>
+          name.includes(word) ||
+          nameKana.includes(word) ||
+          address.includes(word) ||
+          addressKana.includes(word) ||
+          area.includes(word) ||
+          areaKana.includes(word) ||
+          pref.includes(word) ||
+          prefKana.includes(word),
+      );
+    });
+
+    setFilteredMuseums(results);
+
+    // ピンが1件以上あれば位置を調整
+    const pins = results.filter((m) => m.latitude && m.longitude);
+
+    if (pins.length === 1) {
+      // ピンが1件 → 再描画してマップズーム（AutoFitBounds が setView でズームする）
+      setResetKey((prev) => prev + 1);
+    } else if (pins.length > 1) {
+      // 再描画（fitBounds が呼ばれてズーム）
+      setResetKey((prev) => prev + 1);
+    }
+  };
 
   const handleClear = () => {
     setSearchText('');
@@ -124,7 +187,6 @@ export default function HomePage() {
     setClickedMuseumId(null);
     setHoveredMuseumId(null);
     setResetKey((prev) => prev + 1);
-    setMapZoomLevel(5);
 
     setTimeout(() => {
       const el = mapRef.current;
@@ -168,66 +230,11 @@ export default function HomePage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const katakanaToHiragana = (str: string) =>
-    str.replace(/[ァ-ヶ]/g, (match) =>
-      String.fromCharCode(match.charCodeAt(0) - 0x60),
-    );
-
-  const handleSearch = (value: string) => {
-    setSearchText(value);
-
-    if (value.trim() === '') {
-      setFilteredMuseums(museums);
-      setMapZoomLevel(5);
-      return;
-    }
-
-    const keyword = katakanaToHiragana(value.toLowerCase());
-    const keywords = keyword.split(/\s+/);
-
-    const results = museums.filter((museum) => {
-      const name = museum.name.toLowerCase();
-      const nameKana = katakanaToHiragana(
-        museum.name_kana?.toLowerCase() ?? '',
-      );
-      const address = museum.address.toLowerCase();
-      const addressKana = katakanaToHiragana(
-        museum.address_kana?.toLowerCase() ?? '',
-      );
-      const area = museum.area?.toLowerCase() ?? '';
-      const pref = museum.prefecture?.toLowerCase() ?? '';
-
-      return keywords.every(
-        (word) =>
-          name.includes(word) ||
-          nameKana.includes(word) ||
-          address.includes(word) ||
-          addressKana.includes(word) ||
-          area.includes(word) ||
-          pref.includes(word),
-      );
-    });
-
-    setFilteredMuseums(results);
-
-    const matchedPref = museums.find(
-      (m) => m.prefecture?.toLowerCase() === keyword,
-    );
-    const matchedArea = museums.find((m) => m.area?.toLowerCase() === keyword);
-
-    if (matchedPref) {
-      setMapZoomLevel(9);
-    } else if (matchedArea) {
-      setMapZoomLevel(7);
-    } else {
-      setMapZoomLevel(7);
-    }
-  };
-
   const sortedMuseums = sortByPrefecture(filteredMuseums);
 
   return (
     <main>
+      {/* 上部検索・タイトル */}
       <div className='sticky top-0 bg-white z-10 shadow'>
         <div className='p-6 md:p-8 lg:p-10'>
           <h1 className='text-2xl md:text-3xl font-bold mb-4'>昆虫館一覧</h1>
@@ -252,6 +259,7 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* 地図 */}
       <div className='relative z-0 p-6 md:p-8 lg:p-10'>
         <div ref={mapRef} />
         <h2 className='text-xl font-bold mb-4'>昆虫館マップ</h2>
@@ -260,11 +268,10 @@ export default function HomePage() {
           museums={sortedMuseums}
           onHoverMuseum={setHoveredMuseumId}
           onClickMuseum={setClickedMuseumId}
-          zoomLevel={mapZoomLevel}
         />
       </div>
 
-      {/* 昆虫館リスト */}
+      {/* リスト */}
       <div className='p-6 md:p-8 lg:p-10'>
         {loadingMuseums ? (
           <p>読み込み中...</p>
@@ -289,27 +296,7 @@ export default function HomePage() {
                 </h2>
                 <div className='flex items-center space-x-2 mt-1'>
                   {museum.area && (
-                    <span
-                      className={`inline-block border border-gray-300 text-xs md:text-sm font-semibold px-3 py-1 rounded self-start shrink-0 ${
-                        museum.area === '北海道'
-                          ? 'bg-cyan-100 text-cyan-800'
-                          : museum.area === '東北'
-                            ? 'bg-indigo-100 text-indigo-800'
-                            : museum.area === '関東'
-                              ? 'bg-blue-100 text-blue-800'
-                              : museum.area === '中部'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : museum.area === '近畿'
-                                  ? 'bg-green-100 text-green-800'
-                                  : museum.area === '中国'
-                                    ? 'bg-purple-100 text-purple-800'
-                                    : museum.area === '四国'
-                                      ? 'bg-orange-100 text-orange-800'
-                                      : museum.area === '九州'
-                                        ? 'bg-red-100 text-red-800'
-                                        : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
+                    <span className='text-xs font-semibold px-3 py-1 rounded bg-gray-100 text-gray-800 border border-gray-300'>
                       {museum.area}
                     </span>
                   )}
@@ -370,6 +357,7 @@ export default function HomePage() {
         )}
       </div>
 
+      {/* ページトップへボタン */}
       {showScrollTop && (
         <button
           onClick={scrollToTop}

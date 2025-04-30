@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
+import { useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
 type Museum = {
@@ -23,9 +24,9 @@ type MapProps = {
   onHoverMuseum: (_id: number | null) => void;
   onClickMuseum: (_id: number) => void;
   resetKey?: number;
-  zoomLevel?: number;
 };
 
+// Dynamic imports for react-leaflet
 const MapContainer = dynamic(
   () => import('react-leaflet').then((mod) => mod.MapContainer),
   { ssr: false },
@@ -41,20 +42,49 @@ const Marker = dynamic(
 const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
   ssr: false,
 });
-const MapController = dynamic(() => import('./MapController'), { ssr: false });
+
+const DEFAULT_CENTER: [number, number] = [36.2048, 138.2529];
+
+function AutoFitBounds({ museums }: { museums: Museum[] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const updateBounds = async () => {
+      const pins = museums.filter((m) => m.latitude && m.longitude);
+
+      const L = await import('leaflet');
+
+      if (pins.length === 0) {
+        map.setView(DEFAULT_CENTER, 5);
+      } else if (pins.length === 1) {
+        const m = pins[0];
+        map.setView([m.latitude!, m.longitude!], 9);
+      } else {
+        const bounds = L.latLngBounds(
+          pins.map((m) => [m.latitude!, m.longitude!] as [number, number]),
+        );
+        map.fitBounds(bounds, { padding: [50, 50] });
+      }
+    };
+
+    updateBounds();
+  }, [museums, map]);
+
+  return null;
+}
 
 export default function Map({
   museums,
   onHoverMuseum,
   onClickMuseum,
   resetKey,
-  zoomLevel = 7,
 }: MapProps) {
   const [lastTappedMarkerId, setLastTappedMarkerId] = useState<number | null>(
     null,
   );
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 
+  // Leafletのデフォルトアイコンをクライアント側で動的に設定
   useEffect(() => {
     import('leaflet').then((L) => {
       const DefaultIcon = L.icon({
@@ -70,21 +100,17 @@ export default function Map({
   return (
     <MapContainer
       key={resetKey}
-      center={[36.2048, 138.2529]}
+      center={DEFAULT_CENTER}
       zoom={5}
       scrollWheelZoom={true}
       style={{ height: '500px', width: '100%' }}
     >
-      <MapController
-        museums={museums}
-        resetKey={resetKey ?? 0}
-        zoomLevel={zoomLevel}
-      />
-
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
       />
+
+      <AutoFitBounds museums={museums} />
 
       {museums.map((museum) => {
         if (!museum.latitude || !museum.longitude) return null;
