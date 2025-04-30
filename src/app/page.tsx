@@ -115,6 +115,7 @@ export default function HomePage() {
     setSearchText('');
     setFilteredMuseums(museums);
     setClickedMuseumId(null);
+    setHoveredMuseumId(null);
     setResetKey((prev) => prev + 1);
   };
 
