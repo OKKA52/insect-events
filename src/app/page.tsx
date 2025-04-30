@@ -1,6 +1,9 @@
 'use client';
 
-import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowTopRightOnSquareIcon,
+  ChevronUpIcon,
+} from '@heroicons/react/24/solid';
 import { FaFacebookSquare, FaInstagram } from 'react-icons/fa';
 import { useEffect, useRef, useState } from 'react';
 
@@ -109,9 +112,11 @@ export default function HomePage() {
   const [filteredMuseums, setFilteredMuseums] = useState<Museum[]>([]);
   const [hoveredMuseumId, setHoveredMuseumId] = useState<number | null>(null);
   const [clickedMuseumId, setClickedMuseumId] = useState<number | null>(null);
-  const museumRefs = useRef<Record<number, HTMLLIElement | null>>({});
   const [resetKey, setResetKey] = useState(0);
-  const mapRef = useRef<HTMLDivElement | null>(null); // ✅ スクロール用の地図位置
+  const museumRefs = useRef<Record<number, HTMLLIElement | null>>({});
+  const mapRef = useRef<HTMLDivElement | null>(null);
+
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const handleClear = () => {
     setSearchText('');
@@ -120,7 +125,6 @@ export default function HomePage() {
     setHoveredMuseumId(null);
     setResetKey((prev) => prev + 1);
 
-    // ✅ 強制スクロール（sticky header考慮）
     setTimeout(() => {
       const el = mapRef.current;
       if (el) {
@@ -128,6 +132,10 @@ export default function HomePage() {
         window.scrollTo({ top: y, behavior: 'smooth' });
       }
     }, 100);
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -150,6 +158,14 @@ export default function HomePage() {
       }
     }
   }, [clickedMuseumId]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const katakanaToHiragana = (str: string) =>
     str.replace(/[\u30a1-\u30f6]/g, (match) =>
@@ -193,7 +209,7 @@ export default function HomePage() {
 
   return (
     <main>
-      {/* ヘッダー・検索 */}
+      {/* ヘッダー */}
       <div className='sticky top-0 bg-white z-10 shadow'>
         <div className='p-6 md:p-8 lg:p-10'>
           <h1 className='text-2xl md:text-3xl font-bold mb-4'>昆虫館一覧</h1>
@@ -222,9 +238,9 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 地図セクション */}
+      {/* 地図 */}
       <div className='relative z-0 p-6 md:p-8 lg:p-10'>
-        <div ref={mapRef} /> {/* ✅ スクロールターゲット */}
+        <div ref={mapRef} />
         <h2 className='text-xl font-bold mb-4'>昆虫館マップ</h2>
         <Map
           key={resetKey}
@@ -234,7 +250,7 @@ export default function HomePage() {
         />
       </div>
 
-      {/* 昆虫館リスト */}
+      {/* リスト */}
       <div className='p-6 md:p-8 lg:p-10'>
         {loadingMuseums ? (
           <p>読み込み中...</p>
@@ -319,6 +335,17 @@ export default function HomePage() {
           </ul>
         )}
       </div>
+
+      {/* ✅ スクロールアップボタン */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className='fixed bottom-6 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition'
+          aria-label='ページトップへ'
+        >
+          <ChevronUpIcon className='h-6 w-6' />
+        </button>
+      )}
     </main>
   );
 }
