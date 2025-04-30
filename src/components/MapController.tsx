@@ -24,23 +24,22 @@ export default function MapController({
   const map = useMap();
 
   useEffect(() => {
-    if (museums.length === 0) {
-      map.setView([36.2048, 138.2529], 5);
-      return;
-    }
-
     const valid = museums.filter(
       (m) => m.latitude !== undefined && m.longitude !== undefined,
     );
-    if (!valid.length) return;
+    if (!valid.length) {
+      map.setView([36.2048, 138.2529], 5);
+      return;
+    }
 
     const avgLat =
       valid.reduce((sum, m) => sum + (m.latitude ?? 0), 0) / valid.length;
     const avgLng =
       valid.reduce((sum, m) => sum + (m.longitude ?? 0), 0) / valid.length;
 
-    map.flyTo([avgLat, avgLng], zoomLevel); // ← ★ここに反映
-  }, [museums, resetKey, zoomLevel, map]);
+    map.flyTo([avgLat, avgLng], zoomLevel);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetKey, zoomLevel]);
 
   return null;
 }
