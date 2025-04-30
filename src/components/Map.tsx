@@ -23,10 +23,9 @@ type MapProps = {
   onHoverMuseum: (_id: number | null) => void;
   onClickMuseum: (_id: number) => void;
   resetKey?: number;
-  zoomLevel?: number; // ← ★ 追加
+  zoomLevel?: number;
 };
 
-// 動的インポート
 const MapContainer = dynamic(
   () => import('react-leaflet').then((mod) => mod.MapContainer),
   { ssr: false },
@@ -42,14 +41,14 @@ const Marker = dynamic(
 const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
   ssr: false,
 });
-const MapController = dynamic(() => import('./MapController'), { ssr: false }); // ← MapController
+const MapController = dynamic(() => import('./MapController'), { ssr: false });
 
 export default function Map({
   museums,
   onHoverMuseum,
   onClickMuseum,
   resetKey,
-  zoomLevel = 7, // ← デフォルト値
+  zoomLevel = 7,
 }: MapProps) {
   const [lastTappedMarkerId, setLastTappedMarkerId] = useState<number | null>(
     null,
@@ -71,7 +70,7 @@ export default function Map({
   return (
     <MapContainer
       key={resetKey}
-      center={[36.2048, 138.2529]} // 日本の中心
+      center={[36.2048, 138.2529]}
       zoom={5}
       scrollWheelZoom={true}
       style={{ height: '500px', width: '100%' }}
@@ -123,7 +122,7 @@ export default function Map({
                   );
                 }
               },
-              click: (e) => {
+              click: async (e) => {
                 if (isMobile) {
                   if (lastTappedMarkerId === museum.id) {
                     onHoverMuseum(museum.id);
@@ -131,6 +130,15 @@ export default function Map({
                     setLastTappedMarkerId(null);
                   } else {
                     setLastTappedMarkerId(museum.id);
+                    const L = await import('leaflet');
+                    e.target.setIcon(
+                      L.icon({
+                        iconUrl: '/leaflet/marker-icon-red.png',
+                        shadowUrl: '/leaflet/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                      }),
+                    );
                     e.target.openPopup();
                   }
                 } else {
