@@ -273,6 +273,7 @@ export default function HomePage() {
 
       {/* リスト */}
       <div className='p-6 md:p-8 lg:p-10'>
+        <h2 className='text-xl font-bold mb-4'>昆虫館リスト</h2>
         {loadingMuseums ? (
           <p>読み込み中...</p>
         ) : sortedMuseums.length === 0 ? (
