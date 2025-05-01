@@ -84,7 +84,7 @@ export default function Map({
   );
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 
-  // Leafletのデフォルトアイコンをクライアント側で動的に設定
+  // Leafletのデフォルトアイコンをクライアント側で動的設定
   useEffect(() => {
     import('leaflet').then((L) => {
       const DefaultIcon = L.icon({
