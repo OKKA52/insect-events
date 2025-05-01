@@ -1,5 +1,6 @@
 'use client';
 
+import AreaTag from '@/components/AreaTag';
 import {
   ArrowTopRightOnSquareIcon,
   ChevronUpIcon,
@@ -296,31 +297,7 @@ export default function HomePage() {
                   {museum.name}
                 </h2>
                 <div className='flex items-center space-x-2 mt-1'>
-                  {museum.area && (
-                    <span
-                      className={`inline-block border border-gray-300 text-xs md:text-sm font-semibold px-3 py-1 rounded self-start shrink-0 ${
-                        museum.area === '北海道'
-                          ? 'bg-cyan-100 text-cyan-800'
-                          : museum.area === '東北'
-                            ? 'bg-indigo-100 text-indigo-800'
-                            : museum.area === '関東'
-                              ? 'bg-blue-100 text-blue-800'
-                              : museum.area === '中部'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : museum.area === '近畿'
-                                  ? 'bg-green-100 text-green-800'
-                                  : museum.area === '中国'
-                                    ? 'bg-purple-100 text-purple-800'
-                                    : museum.area === '四国'
-                                      ? 'bg-orange-100 text-orange-800'
-                                      : museum.area === '九州'
-                                        ? 'bg-red-100 text-red-800'
-                                        : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
-                      {museum.area}
-                    </span>
-                  )}
+                  {museum.area && <AreaTag area={museum.area} />}
                   <p className='text-sm md:text-base text-gray-600'>
                     {museum.address}
                   </p>
