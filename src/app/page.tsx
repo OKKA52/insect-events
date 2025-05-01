@@ -79,56 +79,58 @@ export default function HomePage() {
   const handleSearch = (value: string) => {
     setSearchText(value);
 
-    const keyword = katakanaToHiragana(value.toLowerCase().trim());
-    const keywords = keyword.split(/\s+/);
+    const rawKeyword = value.trim().normalize('NFC');
+    const hiraganaKeyword = katakanaToHiragana(rawKeyword);
+    const rawKeywords = rawKeyword.split(/\s+/);
+    const hiraKeywords = hiraganaKeyword.split(/\s+/);
 
-    // 空欄の場合はリセット
-    if (keyword === '') {
+    if (rawKeyword === '') {
       setFilteredMuseums(museums);
+      setResetKey((prev) => prev + 1);
       return;
     }
 
     const results = museums.filter((museum) => {
-      const name = museum.name.toLowerCase();
-      const nameKana = katakanaToHiragana(
-        museum.name_kana?.toLowerCase() ?? '',
+      const name = (museum.name ?? '').normalize('NFC');
+      const nameKana = katakanaToHiragana(museum.name_kana ?? '').normalize(
+        'NFC',
       );
-      const address = museum.address.toLowerCase();
+      const address = (museum.address ?? '').normalize('NFC');
       const addressKana = katakanaToHiragana(
-        museum.address_kana?.toLowerCase() ?? '',
+        museum.address_kana ?? '',
+      ).normalize('NFC');
+      const area = (museum.area ?? '').normalize('NFC');
+      const areaKana = katakanaToHiragana(museum.area_kana ?? '').normalize(
+        'NFC',
       );
-      const area = museum.area?.toLowerCase() ?? '';
-      const areaKana = katakanaToHiragana(
-        museum.area_kana?.toLowerCase() ?? '',
-      );
-      const pref = museum.prefecture?.toLowerCase() ?? '';
+      const pref = (museum.prefecture ?? '').normalize('NFC');
       const prefKana = katakanaToHiragana(
-        museum.prefecture_kana?.toLowerCase() ?? '',
-      );
+        museum.prefecture_kana ?? '',
+      ).normalize('NFC');
 
-      return keywords.every(
-        (word) =>
+      return rawKeywords.every((word, i) => {
+        const hiraWord = hiraKeywords[i];
+        return (
           name.includes(word) ||
-          nameKana.includes(word) ||
+          name.includes(hiraWord) ||
+          nameKana.includes(hiraWord) ||
           address.includes(word) ||
-          addressKana.includes(word) ||
+          address.includes(hiraWord) ||
+          addressKana.includes(hiraWord) ||
           area.includes(word) ||
-          areaKana.includes(word) ||
+          area.includes(hiraWord) ||
+          areaKana.includes(hiraWord) ||
           pref.includes(word) ||
-          prefKana.includes(word),
-      );
+          pref.includes(hiraWord) ||
+          prefKana.includes(hiraWord)
+        );
+      });
     });
 
     setFilteredMuseums(results);
 
-    // ピンが1件以上あれば位置を調整
     const pins = results.filter((m) => m.latitude && m.longitude);
-
-    if (pins.length === 1) {
-      // ピンが1件 → 再描画してマップズーム（AutoFitBounds が setView でズームする）
-      setResetKey((prev) => prev + 1);
-    } else if (pins.length > 1) {
-      // 再描画（fitBounds が呼ばれてズーム）
+    if (pins.length > 0) {
       setResetKey((prev) => prev + 1);
     }
   };
