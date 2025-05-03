@@ -195,7 +195,7 @@ export default function HomePage() {
             className='text-2xl md:text-3xl font-bold mb-4 cursor-pointer'
             onClick={handleClear}
           >
-            昆虫館一覧
+            昆虫館マップ
           </h1>
           <div className='flex items-center space-x-6'>
             <input
@@ -221,7 +221,6 @@ export default function HomePage() {
       {/* 地図 */}
       <div className='relative z-0 p-6 md:p-8 lg:p-10'>
         <div ref={mapRef} />
-        <h2 className='text-xl font-bold mb-4'>昆虫館マップ</h2>
         <Map
           key={resetKey}
           museums={sortedMuseums}
@@ -236,7 +235,7 @@ export default function HomePage() {
         {loadingMuseums ? (
           <p>読み込み中...</p>
         ) : sortedMuseums.length === 0 ? (
-          <p>条件に合う昆虫館が見つかりませんでした。</p>
+          <p>条件に合う施設が見つかりませんでした。</p>
         ) : (
           <ul className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
             {sortedMuseums.map((museum) => (
