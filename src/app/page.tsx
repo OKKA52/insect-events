@@ -191,7 +191,12 @@ export default function HomePage() {
       {/* 上部検索・タイトル */}
       <div className='sticky top-0 bg-white z-10 shadow'>
         <div className='p-6 md:p-8 lg:p-10'>
-          <h1 className='text-2xl md:text-3xl font-bold mb-4'>昆虫館一覧</h1>
+          <h1
+            className='text-2xl md:text-3xl font-bold mb-4 cursor-pointer'
+            onClick={handleClear}
+          >
+            昆虫館一覧
+          </h1>
           <div className='flex items-center space-x-6'>
             <input
               type='text'

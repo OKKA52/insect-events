@@ -54,6 +54,11 @@ function AutoFitBounds({ museums }: { museums: Museum[] }) {
 
       const L = await import('leaflet');
 
+      // サイズ再計算を少し遅らせて実行
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
+
       if (pins.length === 0) {
         map.setView(DEFAULT_CENTER, 5);
       } else if (pins.length === 1) {
