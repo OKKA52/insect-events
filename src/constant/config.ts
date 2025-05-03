@@ -1,7 +1,6 @@
 export const siteConfig = {
-  title: 'Next.js + Tailwind CSS + TypeScript Starter',
+  title: '昆虫館マップ | 日本全国の昆虫館を地図で検索',
   description:
-    'A starter for Next.js, Tailwind CSS, and TypeScript with Absolute Import, Seo, Link component, pre-configured with Husky',
-  /** Without additional '/' on the end, e.g. https://theodorusclarence.com */
-  url: 'https://tsnext-tw.thcl.dev',
+    '全国の昆虫館を地図上で探せる「昆虫館マップ」。所在地・公式サイト・SNS情報や、最新の昆虫イベント情報も掲載。',
+  url: 'https://www.konchukan.com', // ← 実際のドメインに書き換えてください
 };
