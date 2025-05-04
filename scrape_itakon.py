@@ -95,14 +95,19 @@ def fetch_events():
 
     return events
 
+
 def save_to_supabase(events):
     for event in events:
+        normalized_title = clean_text(event["title"])  # 正規化をここでも確実に適用
         existing = supabase.table("events")\
             .select("id")\
             .eq("museum_id", event["museum_id"])\
             .eq("title", event["title"])\
             .limit(1)\
             .execute()
+        
+        # 挿入／更新にも正規化済みタイトルを使う
+        event["title"] = normalized_title  
 
         if existing.data and len(existing.data) > 0:
             # UPDATE

@@ -8,28 +8,8 @@ import {
 import { FaFacebookSquare, FaInstagram } from 'react-icons/fa';
 import { prefectures } from '@/utils/prefectures';
 import { useEffect, useRef, useState } from 'react';
-
 import { supabase } from '@/lib/supabase';
 import Map from '@/components/Map';
-
-type Museum = {
-  id: number;
-  name: string;
-  address: string;
-  url: string;
-  facebook_url?: string;
-  x_url?: string;
-  instagram_url?: string;
-  image_url?: string;
-  area?: string;
-  name_kana?: string;
-  prefecture?: string;
-  address_kana?: string;
-  latitude?: number;
-  longitude?: number;
-  area_kana?: string;
-  prefecture_kana?: string;
-};
 
 const sortByPrefecture = (list: Museum[]) => {
   return [...list].sort((a, b) => {
@@ -59,11 +39,48 @@ function XIcon({ className }: { className?: string }) {
   );
 }
 
+type Museum = {
+  id: number;
+  name: string;
+  address: string;
+  url: string;
+  facebook_url?: string;
+  x_url?: string;
+  instagram_url?: string;
+  image_url?: string;
+  area?: string;
+  name_kana?: string;
+  prefecture?: string;
+  address_kana?: string;
+  latitude?: number;
+  longitude?: number;
+  area_kana?: string;
+  prefecture_kana?: string;
+};
+
+type EventWithMuseum = {
+  id: number;
+  title: string;
+  start_date: string;
+  end_date: string;
+  event_url?: string;
+  insect_museums: {
+    id: number;
+    name: string;
+    latitude?: number;
+    longitude?: number;
+    address?: string;
+  } | null;
+};
+
 export default function HomePage() {
+  const [tab, setTab] = useState<'museums' | 'events'>('museums');
   const [museums, setMuseums] = useState<Museum[]>([]);
+  const [events, setEvents] = useState<EventWithMuseum[]>([]);
   const [loadingMuseums, setLoadingMuseums] = useState(true);
   const [searchText, setSearchText] = useState('');
   const [filteredMuseums, setFilteredMuseums] = useState<Museum[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<EventWithMuseum[]>([]);
   const [hoveredMuseumId, setHoveredMuseumId] = useState<number | null>(null);
   const [clickedMuseumId, setClickedMuseumId] = useState<number | null>(null);
   const [resetKey, setResetKey] = useState(0);
@@ -78,7 +95,6 @@ export default function HomePage() {
 
   const handleSearch = (value: string) => {
     setSearchText(value);
-
     const rawKeyword = value.trim().normalize('NFC');
     const hiraganaKeyword = katakanaToHiragana(rawKeyword);
     const rawKeywords = rawKeyword.split(/\s+/);
@@ -86,64 +102,75 @@ export default function HomePage() {
 
     if (rawKeyword === '') {
       setFilteredMuseums(museums);
+      setFilteredEvents(events);
       setResetKey((prev) => prev + 1);
       return;
     }
 
-    const results = museums.filter((museum) => {
-      const name = (museum.name ?? '').normalize('NFC');
-      const nameKana = katakanaToHiragana(museum.name_kana ?? '').normalize(
-        'NFC',
-      );
-      const address = (museum.address ?? '').normalize('NFC');
-      const addressKana = katakanaToHiragana(
-        museum.address_kana ?? '',
-      ).normalize('NFC');
-      const area = (museum.area ?? '').normalize('NFC');
-      const areaKana = katakanaToHiragana(museum.area_kana ?? '').normalize(
-        'NFC',
-      );
-      const pref = (museum.prefecture ?? '').normalize('NFC');
-      const prefKana = katakanaToHiragana(
-        museum.prefecture_kana ?? '',
-      ).normalize('NFC');
-
-      return rawKeywords.every((word, i) => {
-        const hiraWord = hiraKeywords[i];
-        return (
-          name.includes(word) ||
-          name.includes(hiraWord) ||
-          nameKana.includes(hiraWord) ||
-          address.includes(word) ||
-          address.includes(hiraWord) ||
-          addressKana.includes(hiraWord) ||
-          area.includes(word) ||
-          area.includes(hiraWord) ||
-          areaKana.includes(hiraWord) ||
-          pref.includes(word) ||
-          pref.includes(hiraWord) ||
-          prefKana.includes(hiraWord)
+    if (tab === 'museums') {
+      const results = museums.filter((museum) => {
+        const name = (museum.name ?? '').normalize('NFC');
+        const nameKana = katakanaToHiragana(museum.name_kana ?? '').normalize(
+          'NFC',
         );
+        const address = (museum.address ?? '').normalize('NFC');
+        const addressKana = katakanaToHiragana(
+          museum.address_kana ?? '',
+        ).normalize('NFC');
+        const area = (museum.area ?? '').normalize('NFC');
+        const areaKana = katakanaToHiragana(museum.area_kana ?? '').normalize(
+          'NFC',
+        );
+        const pref = (museum.prefecture ?? '').normalize('NFC');
+        const prefKana = katakanaToHiragana(
+          museum.prefecture_kana ?? '',
+        ).normalize('NFC');
+
+        return rawKeywords.every((word, i) => {
+          const hiraWord = hiraKeywords[i];
+          return (
+            name.includes(word) ||
+            name.includes(hiraWord) ||
+            nameKana.includes(hiraWord) ||
+            address.includes(word) ||
+            address.includes(hiraWord) ||
+            addressKana.includes(hiraWord) ||
+            area.includes(word) ||
+            area.includes(hiraWord) ||
+            areaKana.includes(hiraWord) ||
+            pref.includes(word) ||
+            pref.includes(hiraWord) ||
+            prefKana.includes(hiraWord)
+          );
+        });
       });
-    });
-
-    setFilteredMuseums(results);
-
-    const pins = results.filter((m) => m.latitude && m.longitude);
-    if (pins.length > 0) {
-      setResetKey((prev) => prev + 1);
+      setFilteredMuseums(results);
     } else {
-      setResetKey((prev) => prev + 1);
+      const results = events.filter((event) => {
+        const title = event.title.normalize('NFC');
+        const museumName = event.insect_museums?.name?.normalize('NFC') ?? '';
+        return rawKeywords.every((word, i) => {
+          const hiraWord = hiraKeywords[i];
+          return (
+            title.includes(word) ||
+            title.includes(hiraWord) ||
+            museumName.includes(word)
+          );
+        });
+      });
+      setFilteredEvents(results);
     }
+
+    setResetKey((prev) => prev + 1);
   };
 
   const handleClear = () => {
     setSearchText('');
     setFilteredMuseums(museums);
+    setFilteredEvents(events);
     setClickedMuseumId(null);
     setHoveredMuseumId(null);
     setResetKey((prev) => prev + 1);
-
     setTimeout(() => {
       const el = mapRef.current;
       if (el) {
@@ -153,9 +180,7 @@ export default function HomePage() {
     }, 100);
   };
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   useEffect(() => {
     const fetchMuseums = async () => {
@@ -167,21 +192,29 @@ export default function HomePage() {
       setLoadingMuseums(false);
     };
     fetchMuseums();
+
+    const fetchEvents = async () => {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*, insect_museums(id, name, latitude, longitude, address)');
+      if (!error && data) {
+        setEvents(data as EventWithMuseum[]);
+        setFilteredEvents(data as EventWithMuseum[]);
+      }
+    };
+    fetchEvents();
   }, []);
 
   useEffect(() => {
     if (clickedMuseumId !== null) {
       const target = museumRefs.current[clickedMuseumId];
-      if (target) {
+      if (target)
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
     }
   }, [clickedMuseumId]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 300);
-    };
+    const handleScroll = () => setShowScrollTop(window.scrollY > 300);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -190,7 +223,6 @@ export default function HomePage() {
 
   return (
     <main>
-      {/* 上部検索・タイトル */}
       <div className='sticky top-0 bg-white z-10 shadow'>
         <div className='p-6 md:p-8 lg:p-10'>
           <h1
@@ -199,10 +231,24 @@ export default function HomePage() {
           >
             昆虫館マップ
           </h1>
+          <div className='mb-4 flex space-x-4'>
+            <button
+              onClick={() => setTab('museums')}
+              className={`px-4 py-2 rounded ${tab === 'museums' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+            >
+              昆虫館
+            </button>
+            <button
+              onClick={() => setTab('events')}
+              className={`px-4 py-2 rounded ${tab === 'events' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+            >
+              イベント
+            </button>
+          </div>
           <div className='flex items-center space-x-6'>
             <input
               type='text'
-              placeholder='施設名や住所、エリアで検索'
+              placeholder='施設名やイベント名で検索'
               value={searchText}
               onChange={(e) => handleSearch(e.target.value)}
               className='border rounded p-2 w-full max-w-md text-base'
@@ -214,31 +260,44 @@ export default function HomePage() {
               クリア
             </button>
             <span className='text-sm text-gray-600 whitespace-nowrap'>
-              {filteredMuseums.length} 件
+              {tab === 'museums'
+                ? filteredMuseums.length
+                : filteredEvents.length}{' '}
+              件
             </span>
           </div>
         </div>
       </div>
 
-      {/* 地図 */}
       <div className='relative z-0 p-6 md:p-8 lg:p-10'>
         <div ref={mapRef} />
         <Map
           key={resetKey}
-          museums={sortedMuseums}
+          museums={
+            tab === 'museums'
+              ? sortedMuseums
+              : (filteredEvents
+                  .map((e) => ({
+                    id: e.id,
+                    name: e.title,
+                    latitude: e.insect_museums?.latitude,
+                    longitude: e.insect_museums?.longitude,
+                    address: e.insect_museums?.address,
+                  }))
+                  .filter((e) => e.latitude && e.longitude) as Museum[])
+          }
           onHoverMuseum={setHoveredMuseumId}
           onClickMuseum={setClickedMuseumId}
         />
       </div>
 
-      {/* リスト */}
       <div className='p-6 md:p-8 lg:p-10'>
-        <h2 className='text-xl font-bold mb-4'>昆虫館リスト</h2>
+        <h2 className='text-xl font-bold mb-4'>
+          {tab === 'museums' ? '昆虫館リスト' : 'イベント一覧'}
+        </h2>
         {loadingMuseums ? (
           <p>読み込み中...</p>
-        ) : sortedMuseums.length === 0 ? (
-          <p>条件に合う施設が見つかりませんでした。</p>
-        ) : (
+        ) : tab === 'museums' ? (
           <ul className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
             {sortedMuseums.map((museum) => (
               <li
@@ -311,10 +370,36 @@ export default function HomePage() {
               </li>
             ))}
           </ul>
+        ) : (
+          <ul className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
+            {filteredEvents.map((event) => (
+              <li
+                key={event.id}
+                className='border p-4 rounded-lg shadow hover:shadow-md'
+              >
+                <h2 className='text-lg font-semibold'>{event.title}</h2>
+                <p className='text-sm text-gray-600'>
+                  {event.insect_museums?.name || '施設不明'}
+                </p>
+                <p className='text-sm mt-1 text-gray-700'>
+                  {event.start_date} ～ {event.end_date}
+                </p>
+                {event.event_url && (
+                  <a
+                    href={event.event_url}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-blue-600 text-sm hover:underline'
+                  >
+                    詳細はこちら
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
         )}
       </div>
 
-      {/* ページトップへボタン */}
       {showScrollTop && (
         <button
           onClick={scrollToTop}
