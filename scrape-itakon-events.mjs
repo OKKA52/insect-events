@@ -7,7 +7,10 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.test' });
 
 console.log('✅ SUPABASE_URL =', process.env.SUPABASE_URL);
-console.log('✅ SUPABASE_KEY =', process.env.SUPABASE_KEY ? '[OK]' : '[MISSING]');
+console.log(
+  '✅ SUPABASE_KEY =',
+  process.env.SUPABASE_KEY ? '[OK]' : '[MISSING]',
+);
 
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
   throw new Error('❌ SUPABASEの環境変数が不足しています。');
@@ -15,7 +18,7 @@ if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
+  process.env.SUPABASE_KEY,
 );
 
 const MUSEUM_ID = 'f58d41b3-f940-439c-b7c7-70c73d108cea';
@@ -86,16 +89,32 @@ const fetchEvents = async () => {
       const [start_date, end_date] = parseDates(dateText);
 
       const descCell = columns.length === 3 ? columns[2] : columns[1];
-      const base_description_raw = $(descCell).clone().find('img, a').remove().end().text();
+      const base_description_raw = $(descCell)
+        .clone()
+        .find('img, a')
+        .remove()
+        .end()
+        .text();
 
       const nextRow = $(el).next('tr');
-      const extraText_raw = nextRow.find('td, span').clone().find('img, a').remove().end().text();
+      const extraText_raw = nextRow
+        .find('td, span')
+        .clone()
+        .find('img, a')
+        .remove()
+        .end()
+        .text();
 
       const normalizedBase = cleanText(base_description_raw);
       const normalizedExtra = cleanText(extraText_raw);
 
       let merged = normalizedBase;
-      if (normalizedExtra && !normalizeForComparison(normalizedBase).includes(normalizeForComparison(normalizedExtra))) {
+      if (
+        normalizedExtra &&
+        !normalizeForComparison(normalizedBase).includes(
+          normalizeForComparison(normalizedExtra),
+        )
+      ) {
         merged += '\n' + normalizedExtra;
       }
 
