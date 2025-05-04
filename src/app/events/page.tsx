@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react'; // react 関連のインポート
-
-import { supabase } from '@/lib/supabase'; // プロジェクト内のインポート
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 type Event = {
   id: number;
   title: string;
-  event_date: string;
-  description: string;
+  start_date: string;
+  end_date: string;
+  event_description: string;
 };
 
 export default function HomePage() {
@@ -16,7 +16,6 @@ export default function HomePage() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // イベントデータを Supabase から取得
     const fetchEvents = async () => {
       const { data, error } = await supabase
         .from('events')
@@ -24,7 +23,7 @@ export default function HomePage() {
         .order('event_date', { ascending: true });
 
       if (error) {
-        //console.error('Error fetching events:', error.message);
+        // console.error('Error fetching events:', error.message);
       } else {
         setEvents(data as Event[]);
       }
@@ -49,9 +48,11 @@ export default function HomePage() {
             <li key={event.id} className='border p-4 rounded shadow'>
               <h2 className='text-xl font-semibold'>{event.title}</h2>
               <p className='text-sm text-gray-600'>
-                {new Date(event.event_date).toLocaleDateString()}
+                {event.start_date === event.end_date
+                  ? new Date(event.start_date).toLocaleDateString()
+                  : `${new Date(event.start_date).toLocaleDateString()} ～ ${new Date(event.end_date).toLocaleDateString()}`}
               </p>
-              <p className='mt-2'>{event.description}</p>
+              <p className='mt-2'>{event.event_description}</p>
             </li>
           ))}
         </ul>
