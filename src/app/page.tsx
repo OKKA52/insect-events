@@ -81,6 +81,7 @@ export default function HomePage() {
   const [searchText, setSearchText] = useState('');
   const [filteredMuseums, setFilteredMuseums] = useState<Museum[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<EventWithMuseum[]>([]);
+  const [eventSortOrder, setEventSortOrder] = useState<'asc' | 'desc'>('asc');
   const [hoveredMuseumId, setHoveredMuseumId] = useState<number | null>(null);
   const [clickedMuseumId, setClickedMuseumId] = useState<number | null>(null);
   const [resetKey, setResetKey] = useState(0);
@@ -163,6 +164,13 @@ export default function HomePage() {
 
     setResetKey((prev) => prev + 1);
   };
+
+  // 並び替え
+  const sortedEvents = [...filteredEvents].sort((a, b) => {
+    const dateA = new Date(a.start_date).getTime();
+    const dateB = new Date(b.start_date).getTime();
+    return eventSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+  });
 
   const handleClear = () => {
     setSearchText('');
@@ -276,7 +284,7 @@ export default function HomePage() {
           museums={
             tab === 'museums'
               ? sortedMuseums
-              : (filteredEvents
+              : (sortedEvents
                   .map((e) => ({
                     id: e.id,
                     name: e.title,
@@ -292,9 +300,27 @@ export default function HomePage() {
       </div>
 
       <div className='p-6 md:p-8 lg:p-10'>
-        <h2 className='text-xl font-bold mb-4'>
-          {tab === 'museums' ? '昆虫館リスト' : 'イベント一覧'}
-        </h2>
+        {tab === 'museums' ? (
+          <h2 className='text-xl font-bold mb-4'>昆虫館リスト</h2>
+        ) : (
+          <div className='flex items-center mb-4'>
+            <h2 className='text-xl font-bold'>イベント一覧</h2>
+            <div className='flex items-center space-x-2 ml-8'>
+              <label className='text-sm text-gray-600'>開催日順:</label>
+              <select
+                value={eventSortOrder}
+                onChange={(e) =>
+                  setEventSortOrder(e.target.value as 'asc' | 'desc')
+                }
+                className='border p-1 rounded text-sm'
+              >
+                <option value='asc'>近い順</option>
+                <option value='desc'>遠い順</option>
+              </select>
+            </div>
+          </div>
+        )}
+
         {loadingMuseums ? (
           <p>読み込み中...</p>
         ) : tab === 'museums' ? (
@@ -372,7 +398,7 @@ export default function HomePage() {
           </ul>
         ) : (
           <ul className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
-            {filteredEvents.map((event) => (
+            {sortedEvents.map((event) => (
               <li
                 key={event.id}
                 className='border p-4 rounded-lg shadow hover:shadow-md'
