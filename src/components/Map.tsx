@@ -26,7 +26,6 @@ type MapProps = {
   resetKey?: number;
 };
 
-// Dynamic imports for react-leaflet
 const MapContainer = dynamic(
   () => import('react-leaflet').then((mod) => mod.MapContainer),
   { ssr: false },
@@ -51,29 +50,42 @@ function AutoFitBounds({ museums }: { museums: Museum[] }) {
   useEffect(() => {
     const updateBounds = async () => {
       const pins = museums.filter((m) => m.latitude && m.longitude);
-
       const L = await import('leaflet');
 
-      // サイズ再計算を少し遅らせて実行
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 100);
+      map.whenReady(() => {
+        // invalidateSizeだけ即時
+        try {
+          map.invalidateSize();
+        } catch (e) {
+          console.warn('⚠️ invalidateSize error:', e);
+        }
 
-      if (pins.length === 0) {
-        map.setView(DEFAULT_CENTER, 5);
-      } else if (pins.length === 1) {
-        const m = pins[0];
-        map.setView([m.latitude!, m.longitude!], 9);
-      } else {
-        const bounds = L.latLngBounds(
-          pins.map((m) => [m.latitude!, m.longitude!] as [number, number]),
-        );
-        map.fitBounds(bounds, { padding: [50, 50] });
-      }
+        // DOM安定まで2段階待つ
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            try {
+              if (pins.length === 0) {
+                map.setView([36.2048, 138.2529], 5);
+              } else if (pins.length === 1) {
+                map.setView([pins[0].latitude!, pins[0].longitude!], 9);
+              } else {
+                const bounds = L.latLngBounds(
+                  pins.map(
+                    (m) => [m.latitude!, m.longitude!] as [number, number],
+                  ),
+                );
+                map.fitBounds(bounds, { padding: [50, 50] });
+              }
+            } catch (err) {
+              console.warn('❗ setView/fitBounds error:', err);
+            }
+          }, 50); // ← 50ms前後がベストバランス
+        });
+      });
     };
 
     updateBounds();
-  }, [museums, map]);
+  }, [map, museums]);
 
   return null;
 }
@@ -89,7 +101,6 @@ export default function Map({
   );
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 
-  // Leafletのデフォルトアイコンをクライアント側で動的設定
   useEffect(() => {
     import('leaflet').then((L) => {
       const DefaultIcon = L.icon({
@@ -114,9 +125,7 @@ export default function Map({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
       />
-
-      <AutoFitBounds museums={museums} />
-
+      <AutoFitBounds museums={museums} /> {/* ← ✅ 常時表示でOK */}
       {museums.map((museum) => {
         if (!museum.latitude || !museum.longitude) return null;
 

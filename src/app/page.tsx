@@ -132,6 +132,8 @@ export default function HomePage() {
     const pins = results.filter((m) => m.latitude && m.longitude);
     if (pins.length > 0) {
       setResetKey((prev) => prev + 1);
+    } else {
+      setResetKey((prev) => prev + 1);
     }
   };
 
