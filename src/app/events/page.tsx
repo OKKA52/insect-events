@@ -9,6 +9,10 @@ type Event = {
   start_date: string;
   end_date: string;
   event_description: string;
+  event_url?: string;
+  museum?: {
+    name: string;
+  };
 };
 
 export default function HomePage() {
@@ -19,13 +23,16 @@ export default function HomePage() {
     const fetchEvents = async () => {
       const { data, error } = await supabase
         .from('events')
-        .select('*')
-        .order('event_date', { ascending: true });
+        .select(
+          'id, title, start_date, end_date, event_description, event_url, museum:insect_museums(name)',
+        )
+        .order('start_date', { ascending: true });
 
       if (error) {
-        // console.error('Error fetching events:', error.message);
+        console.error('Error fetching events:', error.message);
       } else {
-        setEvents(data as Event[]);
+        console.log('✅ イベントデータ取得:', data);
+        setEvents(data as unknown as Event[]);
       }
 
       setLoading(false);
@@ -47,12 +54,31 @@ export default function HomePage() {
           {events.map((event) => (
             <li key={event.id} className='border p-4 rounded shadow'>
               <h2 className='text-xl font-semibold'>{event.title}</h2>
+
+              <p className='text-sm text-gray-500 mt-1'>
+                開催館：{event.museum?.name ?? '不明'}
+              </p>
+
               <p className='text-sm text-gray-600'>
                 {event.start_date === event.end_date
                   ? new Date(event.start_date).toLocaleDateString()
                   : `${new Date(event.start_date).toLocaleDateString()} ～ ${new Date(event.end_date).toLocaleDateString()}`}
               </p>
+
               <p className='mt-2'>{event.event_description}</p>
+
+              {event.event_url && (
+                <p className='mt-2'>
+                  <a
+                    href={event.event_url}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-blue-600 hover:underline'
+                  >
+                    イベント詳細を見る
+                  </a>
+                </p>
+              )}
             </li>
           ))}
         </ul>
