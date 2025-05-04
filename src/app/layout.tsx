@@ -47,7 +47,7 @@ export default function RootLayout({
     <html lang='ja'>
       <body>
         {children}
-        <Analytics /> {/* ← ここで追加 */}
+        <Analytics /> {/*  ← ここで追加 */}
       </body>
     </html>
   );
