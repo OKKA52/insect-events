@@ -67,6 +67,7 @@ type EventWithMuseum = {
   insect_museums: {
     id: number;
     name: string;
+    name_kana?: string;
     latitude?: number;
     longitude?: number;
     address?: string;
@@ -151,12 +152,17 @@ export default function HomePage() {
         const results = events.filter((event) => {
           const title = event.title.normalize('NFC');
           const museumName = event.insect_museums?.name?.normalize('NFC') ?? '';
+          const museumKana = katakanaToHiragana(
+            event.insect_museums?.name_kana ?? '',
+          ).normalize('NFC');
+
           return rawKeywords.every((word, i) => {
             const hiraWord = hiraKeywords[i];
             return (
               title.includes(word) ||
               title.includes(hiraWord) ||
-              museumName.includes(word)
+              museumName.includes(word) ||
+              museumKana.includes(hiraWord)
             );
           });
         });
@@ -207,7 +213,9 @@ export default function HomePage() {
     const fetchEvents = async () => {
       const { data, error } = await supabase
         .from('events')
-        .select('*, insect_museums(id, name, latitude, longitude, address)');
+        .select(
+          '*, insect_museums(id, name, name_kana,latitude, longitude, address)',
+        );
       if (!error && data) {
         setEvents(data as EventWithMuseum[]);
         setFilteredEvents(data as EventWithMuseum[]);
