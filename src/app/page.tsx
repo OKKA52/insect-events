@@ -66,11 +66,16 @@ type EventWithMuseum = {
   event_url?: string;
   insect_museums: {
     id: number;
-    name: string;
-    name_kana?: string;
     latitude?: number;
     longitude?: number;
+    name: string;
+    name_kana?: string;
     address?: string;
+    address_kana?: string;
+    area?: string;
+    area_kana?: string;
+    prefecture?: string;
+    prefecture_kana?: string;
   } | null;
 };
 
@@ -155,6 +160,17 @@ export default function HomePage() {
           const museumKana = katakanaToHiragana(
             event.insect_museums?.name_kana ?? '',
           ).normalize('NFC');
+          const museumAddressKana = katakanaToHiragana(
+            event.insect_museums?.address_kana ?? '',
+          ).normalize('NFC');
+          const museumAreaKana = katakanaToHiragana(
+            event.insect_museums?.area_kana ?? '',
+          ).normalize('NFC');
+          const museumPref =
+            event.insect_museums?.prefecture?.normalize('NFC') ?? '';
+          const museumPrefKana = katakanaToHiragana(
+            event.insect_museums?.prefecture_kana ?? '',
+          ).normalize('NFC');
 
           return rawKeywords.every((word, i) => {
             const hiraWord = hiraKeywords[i];
@@ -162,7 +178,11 @@ export default function HomePage() {
               title.includes(word) ||
               title.includes(hiraWord) ||
               museumName.includes(word) ||
-              museumKana.includes(hiraWord)
+              museumKana.includes(hiraWord) ||
+              museumAddressKana.includes(hiraWord) ||
+              museumAreaKana.includes(hiraWord) ||
+              museumPref.includes(word) ||
+              museumPrefKana.includes(hiraWord)
             );
           });
         });
@@ -214,7 +234,7 @@ export default function HomePage() {
       const { data, error } = await supabase
         .from('events')
         .select(
-          '*, insect_museums(id, name, name_kana,latitude, longitude, address)',
+          '*, insect_museums(id, name, name_kana,latitude, longitude, address, address_kana,area,area_kana,prefecture,prefecture_kana)',
         );
       if (!error && data) {
         setEvents(data as EventWithMuseum[]);
