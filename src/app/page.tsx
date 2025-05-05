@@ -7,7 +7,7 @@ import {
 } from '@heroicons/react/24/solid';
 import { FaFacebookSquare, FaInstagram } from 'react-icons/fa';
 import { prefectures } from '@/utils/prefectures';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import Map from '@/components/Map';
 
@@ -94,76 +94,79 @@ export default function HomePage() {
       String.fromCharCode(match.charCodeAt(0) - 0x60),
     );
 
-  const handleSearch = (value: string) => {
-    setSearchText(value);
-    const rawKeyword = value.trim().normalize('NFC');
-    const hiraganaKeyword = katakanaToHiragana(rawKeyword);
-    const rawKeywords = rawKeyword.split(/\s+/);
-    const hiraKeywords = hiraganaKeyword.split(/\s+/);
+  const handleSearch = useCallback(
+    (value: string) => {
+      setSearchText(value);
+      const rawKeyword = value.trim().normalize('NFC');
+      const hiraganaKeyword = katakanaToHiragana(rawKeyword);
+      const rawKeywords = rawKeyword.split(/\s+/);
+      const hiraKeywords = hiraganaKeyword.split(/\s+/);
 
-    if (rawKeyword === '') {
-      setFilteredMuseums(museums);
-      setFilteredEvents(events);
+      if (rawKeyword === '') {
+        setFilteredMuseums(museums);
+        setFilteredEvents(events);
+        setResetKey((prev) => prev + 1);
+        return;
+      }
+
+      if (tab === 'museums') {
+        const results = museums.filter((museum) => {
+          const name = (museum.name ?? '').normalize('NFC');
+          const nameKana = katakanaToHiragana(museum.name_kana ?? '').normalize(
+            'NFC',
+          );
+          const address = (museum.address ?? '').normalize('NFC');
+          const addressKana = katakanaToHiragana(
+            museum.address_kana ?? '',
+          ).normalize('NFC');
+          const area = (museum.area ?? '').normalize('NFC');
+          const areaKana = katakanaToHiragana(museum.area_kana ?? '').normalize(
+            'NFC',
+          );
+          const pref = (museum.prefecture ?? '').normalize('NFC');
+          const prefKana = katakanaToHiragana(
+            museum.prefecture_kana ?? '',
+          ).normalize('NFC');
+
+          return rawKeywords.every((word, i) => {
+            const hiraWord = hiraKeywords[i];
+            return (
+              name.includes(word) ||
+              name.includes(hiraWord) ||
+              nameKana.includes(hiraWord) ||
+              address.includes(word) ||
+              address.includes(hiraWord) ||
+              addressKana.includes(hiraWord) ||
+              area.includes(word) ||
+              area.includes(hiraWord) ||
+              areaKana.includes(hiraWord) ||
+              pref.includes(word) ||
+              pref.includes(hiraWord) ||
+              prefKana.includes(hiraWord)
+            );
+          });
+        });
+        setFilteredMuseums(results);
+      } else {
+        const results = events.filter((event) => {
+          const title = event.title.normalize('NFC');
+          const museumName = event.insect_museums?.name?.normalize('NFC') ?? '';
+          return rawKeywords.every((word, i) => {
+            const hiraWord = hiraKeywords[i];
+            return (
+              title.includes(word) ||
+              title.includes(hiraWord) ||
+              museumName.includes(word)
+            );
+          });
+        });
+        setFilteredEvents(results);
+      }
+
       setResetKey((prev) => prev + 1);
-      return;
-    }
-
-    if (tab === 'museums') {
-      const results = museums.filter((museum) => {
-        const name = (museum.name ?? '').normalize('NFC');
-        const nameKana = katakanaToHiragana(museum.name_kana ?? '').normalize(
-          'NFC',
-        );
-        const address = (museum.address ?? '').normalize('NFC');
-        const addressKana = katakanaToHiragana(
-          museum.address_kana ?? '',
-        ).normalize('NFC');
-        const area = (museum.area ?? '').normalize('NFC');
-        const areaKana = katakanaToHiragana(museum.area_kana ?? '').normalize(
-          'NFC',
-        );
-        const pref = (museum.prefecture ?? '').normalize('NFC');
-        const prefKana = katakanaToHiragana(
-          museum.prefecture_kana ?? '',
-        ).normalize('NFC');
-
-        return rawKeywords.every((word, i) => {
-          const hiraWord = hiraKeywords[i];
-          return (
-            name.includes(word) ||
-            name.includes(hiraWord) ||
-            nameKana.includes(hiraWord) ||
-            address.includes(word) ||
-            address.includes(hiraWord) ||
-            addressKana.includes(hiraWord) ||
-            area.includes(word) ||
-            area.includes(hiraWord) ||
-            areaKana.includes(hiraWord) ||
-            pref.includes(word) ||
-            pref.includes(hiraWord) ||
-            prefKana.includes(hiraWord)
-          );
-        });
-      });
-      setFilteredMuseums(results);
-    } else {
-      const results = events.filter((event) => {
-        const title = event.title.normalize('NFC');
-        const museumName = event.insect_museums?.name?.normalize('NFC') ?? '';
-        return rawKeywords.every((word, i) => {
-          const hiraWord = hiraKeywords[i];
-          return (
-            title.includes(word) ||
-            title.includes(hiraWord) ||
-            museumName.includes(word)
-          );
-        });
-      });
-      setFilteredEvents(results);
-    }
-
-    setResetKey((prev) => prev + 1);
-  };
+    },
+    [tab, museums, events],
+  );
 
   // 並び替え
   const sortedEvents = [...filteredEvents].sort((a, b) => {
@@ -226,6 +229,12 @@ export default function HomePage() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (searchText !== '') {
+      handleSearch(searchText);
+    }
+  }, [tab, searchText, handleSearch]);
 
   const sortedMuseums = sortByPrefecture(filteredMuseums);
 
@@ -396,6 +405,17 @@ export default function HomePage() {
               </li>
             ))}
           </ul>
+        ) : sortedEvents.length === 0 ? (
+          <div className='text-gray-600 text-sm mt-4'>
+            <p>該当するイベントが見つかりませんでした。</p>
+            {searchText && (
+              <ul className='list-disc list-inside mt-2 space-y-1'>
+                <li>キーワードを変更して再度検索してください。</li>
+                <li>施設名やエリア名での検索をお試しください。</li>
+                <li>「近い順」に並び替えると見つかる場合があります。</li>
+              </ul>
+            )}
+          </div>
         ) : (
           <ul className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
             {sortedEvents.map((event) => (
