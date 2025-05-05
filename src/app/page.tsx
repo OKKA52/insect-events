@@ -242,13 +242,16 @@ export default function HomePage() {
     <main>
       <div className='sticky top-0 bg-white z-10 shadow'>
         <div className='p-6 md:p-8 lg:p-10'>
+          {/* タイトル */}
           <h1
             className='text-2xl md:text-3xl font-bold mb-4 cursor-pointer'
             onClick={handleClear}
           >
             昆虫館マップ
           </h1>
-          <div className='mb-4 flex space-x-4'>
+
+          {/* タブボタン + 件数 */}
+          <div className='mb-4 flex items-center'>
             <button
               onClick={() => setTab('museums')}
               className={`px-4 py-2 rounded ${tab === 'museums' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
@@ -257,11 +260,18 @@ export default function HomePage() {
             </button>
             <button
               onClick={() => setTab('events')}
-              className={`px-4 py-2 rounded ${tab === 'events' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+              className={`ml-4 px-4 py-2 rounded ${tab === 'events' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
             >
               イベント
             </button>
+            <span className='ml-10 text-sm text-gray-600'>
+              {tab === 'museums'
+                ? filteredMuseums.length
+                : filteredEvents.length}{' '}
+              件
+            </span>
           </div>
+
           <div className='flex items-center space-x-6'>
             <input
               type='text'
@@ -280,12 +290,6 @@ export default function HomePage() {
             >
               クリア
             </button>
-            <span className='text-sm text-gray-600 whitespace-nowrap'>
-              {tab === 'museums'
-                ? filteredMuseums.length
-                : filteredEvents.length}{' '}
-              件
-            </span>
           </div>
         </div>
       </div>
