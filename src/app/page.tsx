@@ -265,7 +265,11 @@ export default function HomePage() {
           <div className='flex items-center space-x-6'>
             <input
               type='text'
-              placeholder='施設名やイベント名で検索'
+              placeholder={
+                tab === 'museums'
+                  ? '施設名や県・エリア名で検索'
+                  : '施設名やイベント名で検索'
+              }
               value={searchText}
               onChange={(e) => handleSearch(e.target.value)}
               className='border rounded p-2 w-full max-w-md text-base'
