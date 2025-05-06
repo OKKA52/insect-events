@@ -10,6 +10,7 @@ import { prefectures } from '@/utils/prefectures';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import Map from '@/components/Map';
+import Image from 'next/image';
 
 const sortByPrefecture = (list: Museum[]) => {
   return [...list].sort((a, b) => {
@@ -25,19 +26,6 @@ const sortByPrefecture = (list: Museum[]) => {
     }
   });
 };
-
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns='http://www.w3.org/2000/svg'
-      viewBox='0 0 1200 1227'
-      fill='currentColor'
-      className={className}
-    >
-      <path d='M1200 0L741 631l454 596h-269L600 797 287 1227H0l474-640L37 0h269l295 423L913 0z' />
-    </svg>
-  );
-}
 
 type Museum = {
   id: number;
@@ -422,9 +410,12 @@ export default function HomePage() {
                       rel='noopener noreferrer'
                       className='text-black'
                     >
-                      <div className='w-6 h-6 border border-gray-400 rounded-md flex items-center justify-center'>
-                        <XIcon className='w-3 h-3' />
-                      </div>
+                      <Image
+                        src='/images/x-icon.png'
+                        alt='X'
+                        width={21}
+                        height={21}
+                      />
                     </a>
                   )}
                   {museum.instagram_url && (
