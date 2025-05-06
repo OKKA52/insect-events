@@ -1,5 +1,6 @@
 // tailwind.config.js
 module.exports = {
+  darkMode: 'media',
   content: [
     './src/**/*.{html,ts,tsx}', // 必要に応じて内容を調整
   ],

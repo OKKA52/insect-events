@@ -1,3 +1,4 @@
+/* 'use client' が先頭に必要 */
 'use client';
 
 import AreaTag from '@/components/AreaTag';
@@ -182,7 +183,6 @@ export default function HomePage() {
     [tab, museums, events],
   );
 
-  // 並び替え
   const sortedEvents = [...filteredEvents].sort((a, b) => {
     const dateA = new Date(a.start_date).getTime();
     const dateB = new Date(b.start_date).getTime();
@@ -256,31 +256,29 @@ export default function HomePage() {
 
   return (
     <main>
-      <div className='sticky top-0 bg-white z-10 shadow'>
+      <div className='sticky top-0 bg-white dark:bg-gray-900 z-10 shadow'>
         <div className='p-6 md:p-8 lg:p-10'>
-          {/* タイトル */}
           <h1
-            className='text-2xl md:text-3xl font-bold mb-4 cursor-pointer'
+            className='text-2xl md:text-3xl font-bold mb-4 cursor-pointer text-black dark:text-white'
             onClick={handleClear}
           >
             昆虫館マップ
           </h1>
 
-          {/* タブボタン + 件数 */}
           <div className='mb-4 flex items-center'>
             <button
               onClick={() => setTab('museums')}
-              className={`px-4 py-2 rounded ${tab === 'museums' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+              className={`px-4 py-2 rounded ${tab === 'museums' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-white'}`}
             >
               昆虫館
             </button>
             <button
               onClick={() => setTab('events')}
-              className={`ml-4 px-4 py-2 rounded ${tab === 'events' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+              className={`ml-4 px-4 py-2 rounded ${tab === 'events' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-white'}`}
             >
               イベント
             </button>
-            <span className='ml-10 text-sm text-gray-600'>
+            <span className='ml-10 text-sm text-gray-600 dark:text-white'>
               {tab === 'museums'
                 ? filteredMuseums.length
                 : filteredEvents.length}{' '}
@@ -298,7 +296,7 @@ export default function HomePage() {
               }
               value={searchText}
               onChange={(e) => handleSearch(e.target.value)}
-              className='border rounded p-2 w-full max-w-md text-base'
+              className='border rounded p-2 w-full max-w-md text-base bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-600'
             />
             <button
               onClick={handleClear}
@@ -310,7 +308,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className='relative z-0 p-6 md:p-8 lg:p-10'>
+      <div className='relative z-0 p-6 md:p-8 lg:p-10 bg-white dark:bg-gray-900'>
         <div ref={mapRef} />
         <Map
           key={resetKey}
@@ -332,20 +330,26 @@ export default function HomePage() {
         />
       </div>
 
-      <div className='p-6 md:p-8 lg:p-10'>
+      <div className='p-6 md:p-8 lg:p-10 bg-white dark:bg-gray-900'>
         {tab === 'museums' ? (
-          <h2 className='text-xl font-bold mb-4'>昆虫館リスト</h2>
+          <h2 className='text-xl font-bold mb-4 text-black dark:text-white'>
+            昆虫館リスト
+          </h2>
         ) : (
           <div className='flex items-center mb-4'>
-            <h2 className='text-xl font-bold'>イベント一覧</h2>
+            <h2 className='text-xl font-bold text-black dark:text-white'>
+              イベント一覧
+            </h2>
             <div className='flex items-center space-x-2 ml-8'>
-              <label className='text-sm text-gray-600'>開催日順:</label>
+              <label className='text-sm text-gray-600 dark:text-gray-300'>
+                開催日順:
+              </label>
               <select
                 value={eventSortOrder}
                 onChange={(e) =>
                   setEventSortOrder(e.target.value as 'asc' | 'desc')
                 }
-                className='border p-1 rounded text-sm'
+                className='border p-1 rounded text-sm bg-white dark:bg-gray-800 dark:text-white dark:border-gray-600'
               >
                 <option value='asc'>近い順</option>
                 <option value='desc'>遠い順</option>
@@ -355,7 +359,7 @@ export default function HomePage() {
         )}
 
         {loadingMuseums ? (
-          <p>読み込み中...</p>
+          <p className='text-gray-700 dark:text-gray-300'>読み込み中...</p>
         ) : tab === 'museums' ? (
           <ul className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
             {sortedMuseums.map((museum) => (
@@ -364,18 +368,14 @@ export default function HomePage() {
                 ref={(el) => {
                   museumRefs.current[museum.id] = el;
                 }}
-                className={`border p-4 rounded-lg shadow transition ${
-                  hoveredMuseumId === museum.id
-                    ? 'bg-yellow-100'
-                    : 'hover:shadow-md'
-                }`}
+                className={`border p-4 rounded-lg shadow transition ${hoveredMuseumId === museum.id ? 'bg-yellow-100 dark:bg-yellow-900' : 'hover:shadow-md dark:border-gray-600 dark:bg-gray-800'}`}
               >
-                <h2 className='text-lg md:text-xl font-semibold'>
+                <h2 className='text-lg md:text-xl font-semibold text-black dark:text-white'>
                   {museum.name}
                 </h2>
                 <div className='flex items-center space-x-2 mt-1'>
                   {museum.area && <AreaTag area={museum.area} />}
-                  <p className='text-sm md:text-base text-gray-600'>
+                  <p className='text-sm md:text-base text-gray-600 dark:text-gray-300'>
                     {museum.address}
                   </p>
                 </div>
@@ -408,7 +408,7 @@ export default function HomePage() {
                       href={museum.x_url}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='text-black'
+                      className='text-black dark:text-white'
                     >
                       <Image
                         src='/images/x-icon.png'
@@ -433,7 +433,7 @@ export default function HomePage() {
             ))}
           </ul>
         ) : sortedEvents.length === 0 ? (
-          <div className='text-gray-600 text-sm mt-4'>
+          <div className='text-gray-600 dark:text-gray-300 text-sm mt-4'>
             <p>該当するイベントが見つかりませんでした。</p>
             {searchText && (
               <ul className='list-disc list-inside mt-2 space-y-1'>
@@ -447,14 +447,16 @@ export default function HomePage() {
           <ul className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
             {sortedEvents.map((event) => (
               <li
+                className='border p-4 rounded-lg shadow hover:shadow-md dark:border-gray-600 dark:bg-gray-800'
                 key={event.id}
-                className='border p-4 rounded-lg shadow hover:shadow-md'
               >
-                <h2 className='text-lg font-semibold'>{event.title}</h2>
-                <p className='text-sm text-gray-600'>
+                <h2 className='text-lg font-semibold text-black dark:text-white'>
+                  {event.title}
+                </h2>
+                <p className='text-sm text-gray-600 dark:text-gray-300'>
                   {event.insect_museums?.name || '施設不明'}
                 </p>
-                <p className='text-sm mt-1 text-gray-700'>
+                <p className='text-sm mt-1 text-gray-700 dark:text-gray-400'>
                   {event.start_date} ～ {event.end_date}
                 </p>
                 {event.event_url && (
