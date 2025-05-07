@@ -74,7 +74,6 @@ export default function HomePage() {
   const [tab, setTab] = useState<'museums' | 'events'>('museums');
   const [museums, setMuseums] = useState<Museum[]>([]);
   const [events, setEvents] = useState<EventWithMuseum[]>([]);
-  const [loadingMuseums, setLoadingMuseums] = useState(true);
   const [searchText, setSearchText] = useState('');
   const [filteredMuseums, setFilteredMuseums] = useState<Museum[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<EventWithMuseum[]>([]);
@@ -218,7 +217,6 @@ export default function HomePage() {
         setMuseums(data as Museum[]);
         setFilteredMuseums(data as Museum[]);
       }
-      setLoadingMuseums(false);
     };
     fetchMuseums();
 
@@ -362,133 +360,147 @@ export default function HomePage() {
           </div>
         )}
 
-        {loadingMuseums ? (
-          <p className='text-gray-700 dark:text-gray-300'>読み込み中...</p>
-        ) : tab === 'museums' ? (
-          <ul className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
-            {sortedMuseums.map((museum) => (
-              <li
-                key={museum.id}
-                ref={(el) => {
-                  museumRefs.current[museum.id] = el;
-                }}
-                className={`border p-4 rounded-lg shadow transition ${hoveredMuseumId === museum.id ? 'bg-yellow-100 dark:bg-yellow-900' : 'hover:shadow-md dark:border-gray-600 dark:bg-gray-800'}`}
-              >
-                <h2 className='text-lg md:text-xl font-semibold text-black dark:text-white'>
-                  {museum.name}
-                </h2>
-                <div className='flex items-center space-x-2 mt-1'>
-                  {museum.area && <AreaTag area={museum.area} />}
-                  <p className='text-sm md:text-base text-gray-600 dark:text-gray-300'>
-                    {museum.address}
-                  </p>
-                </div>
-                <div className='flex items-center space-x-3 md:space-x-5 mt-3'>
-                  {museum.url && (
-                    <a
-                      href={museum.url}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='text-blue-600 hover:underline flex items-center'
-                    >
-                      <ArrowTopRightOnSquareIcon className='h-5 w-5 text-blue-600 dark:text-gray-300' />
-                      <span className='ml-1 text-sm md:text-blue-600 dark:text-gray-300'>
-                        Webサイト
-                      </span>
-                    </a>
-                  )}
-                  {museum.facebook_url && (
-                    <a
-                      href={museum.facebook_url}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='text-blue-600 dark:text-gray-300 dark:text-blue-400'
-                    >
-                      <FaFacebookSquare className='h-6 w-6' />
-                    </a>
-                  )}
-                  {museum.x_url && (
-                    <a
-                      href={museum.x_url}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='text-black dark:text-white'
-                    >
-                      <Image
-                        src='/images/x-icon.png'
-                        alt='X'
-                        width={23}
-                        height={23}
-                        className='h-6 w-6 object-contain mt-[1px] rounded hover:opacity-80'
-                      />
-                    </a>
-                  )}
-                  {museum.instagram_url && (
-                    <a
-                      href={museum.instagram_url}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='text-pink-500'
-                    >
-                      <FaInstagram className='h-6 w-6' />
-                    </a>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : sortedEvents.length === 0 ? (
-          <div className='text-gray-600 dark:text-gray-300 text-sm mt-4'>
-            <p>該当するイベントが見つかりませんでした。</p>
-            {searchText && (
-              <ul className='list-disc list-inside mt-2 space-y-1'>
-                <li>キーワードを変更して再度検索してください。</li>
-                <li>施設名やエリア名での検索をお試しください。</li>
-                <li>「近い順」に並び替えると見つかる場合があります。</li>
-              </ul>
-            )}
-          </div>
-        ) : (
-          <ul className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
-            {sortedEvents.map((event) => (
-              <li
-                className='border p-4 rounded-lg shadow hover:shadow-md dark:border-gray-600 dark:bg-gray-800'
-                key={event.id}
-              >
-                <h2 className='text-lg font-semibold text-black dark:text-white'>
-                  {event.title}
-                </h2>
-                <p className='text-sm text-gray-600 dark:text-gray-300'>
-                  {event.insect_museums?.name || '施設不明'}
-                </p>
-                <p className='text-sm mt-1 text-gray-700 dark:text-gray-400'>
-                  {event.start_date} ～ {event.end_date}
-                </p>
-                {event.event_url && (
-                  <a
-                    href={event.event_url}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-blue-600 dark:text-gray-300 text-sm hover:underline'
-                  >
-                    詳細はこちら
-                  </a>
+        <div className='p-6 md:p-8 lg:p-10 bg-white dark:bg-gray-900'>
+          {tab === 'museums' ? (
+            filteredMuseums.length === 0 ? (
+              <div className='text-gray-600 dark:text-gray-300 text-sm mt-4'>
+                <p>該当する昆虫館が見つかりませんでした。</p>
+                {searchText && (
+                  <ul className='list-disc list-inside mt-2 space-y-1'>
+                    <li>キーワードを変更して再度検索してください。</li>
+                    <li>施設名やエリア名での検索をお試しください。</li>
+                  </ul>
                 )}
-              </li>
-            ))}
-          </ul>
+              </div>
+            ) : (
+              <ul className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
+                {sortedMuseums.map((museum) => (
+                  <li
+                    key={museum.id}
+                    ref={(el) => {
+                      museumRefs.current[museum.id] = el;
+                    }}
+                    className={`border p-4 rounded-lg shadow transition ${
+                      hoveredMuseumId === museum.id
+                        ? 'bg-yellow-100 dark:bg-yellow-900'
+                        : 'hover:shadow-md dark:border-gray-600 dark:bg-gray-800'
+                    }`}
+                  >
+                    <h2 className='text-lg md:text-xl font-semibold text-black dark:text-white'>
+                      {museum.name}
+                    </h2>
+                    <div className='flex items-center space-x-2 mt-1'>
+                      {museum.area && <AreaTag area={museum.area} />}
+                      <p className='text-sm md:text-base text-gray-600 dark:text-gray-300'>
+                        {museum.address}
+                      </p>
+                    </div>
+                    <div className='flex items-center space-x-3 md:space-x-5 mt-3'>
+                      {museum.url && (
+                        <a
+                          href={museum.url}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='text-blue-600 hover:underline flex items-center'
+                        >
+                          <ArrowTopRightOnSquareIcon className='h-5 w-5 text-blue-600 dark:text-gray-300' />
+                          <span className='ml-1 text-sm md:text-blue-600 dark:text-gray-300'>
+                            Webサイト
+                          </span>
+                        </a>
+                      )}
+                      {museum.facebook_url && (
+                        <a
+                          href={museum.facebook_url}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='text-blue-600 dark:text-gray-300'
+                        >
+                          <FaFacebookSquare className='h-6 w-6' />
+                        </a>
+                      )}
+                      {museum.x_url && (
+                        <a
+                          href={museum.x_url}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='text-black dark:text-white'
+                        >
+                          <Image
+                            src='/images/x-icon.png'
+                            alt='X'
+                            width={23}
+                            height={23}
+                            className='h-6 w-6 object-contain mt-[1px] rounded hover:opacity-80'
+                          />
+                        </a>
+                      )}
+                      {museum.instagram_url && (
+                        <a
+                          href={museum.instagram_url}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='text-pink-500'
+                        >
+                          <FaInstagram className='h-6 w-6' />
+                        </a>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )
+          ) : sortedEvents.length === 0 ? (
+            <div className='text-gray-600 dark:text-gray-300 text-sm mt-4'>
+              <p>該当するイベントが見つかりませんでした。</p>
+              {searchText && (
+                <ul className='list-disc list-inside mt-2 space-y-1'>
+                  <li>キーワードを変更して再度検索してください。</li>
+                  <li>施設名やエリア名での検索をお試しください。</li>
+                </ul>
+              )}
+            </div>
+          ) : (
+            <ul className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
+              {sortedEvents.map((event) => (
+                <li
+                  key={event.id}
+                  className='border p-4 rounded-lg shadow hover:shadow-md dark:border-gray-600 dark:bg-gray-800'
+                >
+                  <h2 className='text-lg font-semibold text-black dark:text-white'>
+                    {event.title}
+                  </h2>
+                  <p className='text-sm text-gray-600 dark:text-gray-300'>
+                    {event.insect_museums?.name || '施設不明'}
+                  </p>
+                  <p className='text-sm mt-1 text-gray-700 dark:text-gray-400'>
+                    {event.start_date} ～ {event.end_date}
+                  </p>
+                  {event.event_url && (
+                    <a
+                      href={event.event_url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-blue-600 dark:text-gray-300 text-sm hover:underline'
+                    >
+                      詳細はこちら
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        {showScrollTop && (
+          <button
+            onClick={scrollToTop}
+            className='fixed bottom-6 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition'
+            aria-label='ページトップへ'
+          >
+            <ChevronUpIcon className='h-6 w-6' />
+          </button>
         )}
       </div>
-
-      {showScrollTop && (
-        <button
-          onClick={scrollToTop}
-          className='fixed bottom-6 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition'
-          aria-label='ページトップへ'
-        >
-          <ChevronUpIcon className='h-6 w-6' />
-        </button>
-      )}
     </main>
   );
 }
