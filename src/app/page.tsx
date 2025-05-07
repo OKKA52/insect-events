@@ -13,22 +13,8 @@ import { supabase } from '@/lib/supabase';
 import Map from '@/components/Map';
 import Image from 'next/image';
 
-const sortByPrefecture = (list: Museum[]) => {
-  return [...list].sort((a, b) => {
-    const indexA = prefectures.indexOf(a.prefecture ?? '');
-    const indexB = prefectures.indexOf(b.prefecture ?? '');
-    if (indexA !== -1 && indexB !== -1) {
-      if (indexA === indexB) {
-        return (a.name_kana ?? '').localeCompare(b.name_kana ?? '', 'ja');
-      }
-      return indexA - indexB;
-    } else {
-      return (a.prefecture ?? '').localeCompare(b.prefecture ?? '', 'ja');
-    }
-  });
-};
-
-type Museum = {
+// 型定義
+interface Museum {
   id: number;
   name: string;
   address: string;
@@ -45,28 +31,44 @@ type Museum = {
   longitude?: number;
   area_kana?: string;
   prefecture_kana?: string;
-};
+}
 
-type EventWithMuseum = {
+interface EventWithMuseum {
   id: number;
   title: string;
   start_date: string;
   end_date: string;
   event_url?: string;
-  insect_museums: {
-    id: number;
-    latitude?: number;
-    longitude?: number;
-    name: string;
-    name_kana?: string;
-    address?: string;
-    address_kana?: string;
-    area?: string;
-    area_kana?: string;
-    prefecture?: string;
-    prefecture_kana?: string;
-  } | null;
+  insect_museums: Museum | null;
+}
+
+const sortByPrefecture = (list: Museum[]): Museum[] => {
+  return [...list].sort((a, b) => {
+    const indexA = prefectures.indexOf(a.prefecture ?? '');
+    const indexB = prefectures.indexOf(b.prefecture ?? '');
+    if (indexA !== -1 && indexB !== -1) {
+      if (indexA === indexB) {
+        return (a.name_kana ?? '').localeCompare(b.name_kana ?? '', 'ja');
+      }
+      return indexA - indexB;
+    } else {
+      return (a.prefecture ?? '').localeCompare(b.prefecture ?? '', 'ja');
+    }
+  });
 };
+
+const toHalfWidth = (str: string): string => {
+  return str
+    .replace(/[！-～]/g, (ch: string) =>
+      String.fromCharCode(ch.charCodeAt(0) - 0xfee0),
+    )
+    .replace(/　/g, ' ');
+};
+
+const katakanaToHiragana = (str: string): string =>
+  str.replace(/[ァ-ヶ]/g, (match: string) =>
+    String.fromCharCode(match.charCodeAt(0) - 0x60),
+  );
 
 export default function HomePage() {
   const [tab, setTab] = useState<'museums' | 'events'>('museums');
@@ -84,20 +86,18 @@ export default function HomePage() {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  const katakanaToHiragana = (str: string) =>
-    str.replace(/[ァ-ヶ]/g, (match) =>
-      String.fromCharCode(match.charCodeAt(0) - 0x60),
-    );
-
   const handleSearch = useCallback(
     (value: string) => {
       setSearchText(value);
-      const rawKeyword = value.trim().normalize('NFC');
-      const hiraganaKeyword = katakanaToHiragana(rawKeyword);
-      const rawKeywords = rawKeyword.split(/\s+/);
+
+      const rawKeyword = value.trim();
+      const halfWidthKeyword = toHalfWidth(rawKeyword).normalize('NFC');
+      const hiraganaKeyword = katakanaToHiragana(halfWidthKeyword);
+
+      const rawKeywords = halfWidthKeyword.split(/\s+/);
       const hiraKeywords = hiraganaKeyword.split(/\s+/);
 
-      if (rawKeyword === '') {
+      if (halfWidthKeyword === '') {
         setFilteredMuseums(museums);
         setFilteredEvents(events);
         setResetKey((prev) => prev + 1);
@@ -149,6 +149,8 @@ export default function HomePage() {
           const museumKana = katakanaToHiragana(
             event.insect_museums?.name_kana ?? '',
           ).normalize('NFC');
+          const museumAddress =
+            event.insect_museums?.address?.normalize('NFC') ?? '';
           const museumAddressKana = katakanaToHiragana(
             event.insect_museums?.address_kana ?? '',
           ).normalize('NFC');
@@ -168,6 +170,8 @@ export default function HomePage() {
               title.includes(hiraWord) ||
               museumName.includes(word) ||
               museumKana.includes(hiraWord) ||
+              museumAddress.includes(word) ||
+              museumAddress.includes(hiraWord) ||
               museumAddressKana.includes(hiraWord) ||
               museumAreaKana.includes(hiraWord) ||
               museumPref.includes(word) ||
