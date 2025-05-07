@@ -413,9 +413,9 @@ export default function HomePage() {
                       <Image
                         src='/images/x-icon.png'
                         alt='X'
-                        width={25}
-                        height={25}
-                        className='h-6.5 w-6.5 object-contain mt-[1px] rounded hover:opacity-80'
+                        width={23}
+                        height={23}
+                        className='h-6 w-6 object-contain mt-[1px] rounded hover:opacity-80'
                       />
                     </a>
                   )}
