@@ -387,8 +387,8 @@ export default function HomePage() {
                       rel='noopener noreferrer'
                       className='text-blue-600 hover:underline flex items-center'
                     >
-                      <ArrowTopRightOnSquareIcon className='h-5 w-5' />
-                      <span className='ml-1 text-sm md:text-base'>
+                      <ArrowTopRightOnSquareIcon className='h-5 w-5 text-blue-600 dark:text-gray-300' />
+                      <span className='ml-1 text-sm md:text-blue-600 dark:text-gray-300'>
                         Webサイト
                       </span>
                     </a>
@@ -398,7 +398,7 @@ export default function HomePage() {
                       href={museum.facebook_url}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='text-blue-600'
+                      className='text-blue-600 dark:text-gray-300 dark:text-blue-400'
                     >
                       <FaFacebookSquare className='h-6 w-6' />
                     </a>
@@ -413,8 +413,9 @@ export default function HomePage() {
                       <Image
                         src='/images/x-icon.png'
                         alt='X'
-                        width={21}
-                        height={21}
+                        width={25}
+                        height={25}
+                        className='h-6.5 w-6.5 object-contain mt-[1px] rounded hover:opacity-80'
                       />
                     </a>
                   )}
@@ -464,7 +465,7 @@ export default function HomePage() {
                     href={event.event_url}
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='text-blue-600 text-sm hover:underline'
+                    className='text-blue-600 dark:text-gray-300 text-sm hover:underline'
                   >
                     詳細はこちら
                   </a>
