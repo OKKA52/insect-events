@@ -5,6 +5,7 @@ import unicodedata
 from datetime import datetime
 from supabase import create_client, Client
 from dotenv import load_dotenv
+from playwright.sync_api import sync_playwright
 import os
 
 # ✅ .env.test を明示的に読み込む
@@ -16,7 +17,7 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 print("✅ URL =", SUPABASE_URL)
 print("✅ KEY =", '[OK]' if SUPABASE_KEY else '[MISSING]')
 
-MUSEUM_ID = "f58d41b3-f940-439c-b7c7-70c73d108cea"
+MUSEUM_ID = "775284cf-d328-429d-b2e7-bbf894158bc9"
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -67,67 +68,78 @@ def parse_date_range(text):
     return start, end
 
 def fetch_events():
-    url = "https://www.itakon.com/news/events"
-    res = requests.get(url)
-    res.encoding = res.apparent_encoding
-    soup = BeautifulSoup(res.text, "html.parser")
-
     events = []
-    rows = soup.find_all("tr")
-    for i in range(len(rows)):
-        row = rows[i]
-        columns = row.find_all("td")
-        if len(columns) < 2:
-            continue
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
 
-        date_text = clean_text(columns[0].text)
-        title_raw = columns[1].find("strong")
-        title = clean_text(title_raw.text if title_raw else columns[1].text)
-        description = ""
+        page_num = 1
+        while True:
+            url = f"https://ryu-yo.jp/event/page/{page_num}/" if page_num > 1 else "https://ryu-yo.jp/event/"
+            print(f"🌐 ページ取得中: {url}")
+            page.goto(url)
+            try:
+                page.wait_for_selector("li.eventArchiveList--item", timeout=5000)
+            except:
+                print("⛔️ イベントセレクタが見つからなかったため、終了")
+                break
 
-        # 別セルに説明文がある場合
-        if len(columns) >= 3:
-            description = clean_text(columns[2].get_text(separator=" "))
+            html = page.content()
+            soup = BeautifulSoup(html, "html.parser")
 
-        # 次の tr に補足がある場合
-        if i + 1 < len(rows):
-            next_row = rows[i + 1]
-            next_columns = next_row.find_all("td")
-            if len(next_columns) == 1:
-                extra = clean_text(next_columns[0].get_text(separator=" "))
-                if extra:
-                    description += " " + extra
+            items = soup.find_all("li", class_="eventArchiveList--item")
+            if not items:
+                print("📭 イベントが見つかりませんでした。ページ終了。")
+                break
 
-        # 重複除去
-        description = remove_duplicate_sentences(description)
+            print(f"🧪 ページ {page_num}: イベント数 = {len(items)}")
 
-        start_date, end_date = parse_date_range(date_text)
-        if title and start_date:
-            events.append({
-                "title": title,
-                "museum_id": MUSEUM_ID,
-                "start_date": start_date,
-                "end_date": end_date,
-                "event_description": description,
-                "event_url": url,
-            })
+            for item in items:
+                title_el = item.select_one("h3.title")
+                date_el = item.select_one("dl .dl-row:nth-of-type(1) dd")
+                description_el = item.select_one("p.mb30")
 
+                title = clean_text(title_el.text if title_el else "")
+                date_text = clean_text(date_el.text if date_el else "")
+                description = clean_text(description_el.text if description_el else "")
+                description = remove_duplicate_sentences(description)
+
+                print(f"📝 タイトル: {title}")
+                print(f"📅 日付テキスト: {date_text}")
+
+                start_date, end_date = parse_date_range(date_text)
+                print(f"➡️ パース結果: start={start_date}, end={end_date}")
+
+                if title and start_date:
+                    events.append({
+                        "title": title,
+                        "museum_id": MUSEUM_ID,
+                        "start_date": start_date,
+                        "end_date": end_date,
+                        "event_description": description,
+                        "event_url": url,
+                    })
+
+            page_num += 1  # 次ページへ
+
+        browser.close()
+
+    print(f"📦 全ページ合計イベント数: {len(events)}")
     return events
-
 
 def save_to_supabase(events):
     for event in events:
         normalized_title = clean_text(event["title"])  # 正規化をここでも確実に適用
+        event["title"] = normalized_title
+
         existing = supabase.table("events")\
             .select("id")\
             .eq("museum_id", event["museum_id"])\
             .eq("title", event["title"])\
+            .eq("start_date", event["start_date"])\
             .limit(1)\
             .execute()
         
-        # 挿入／更新にも正規化済みタイトルを使う
-        event["title"] = normalized_title  
-
         if existing.data and len(existing.data) > 0:
             # UPDATE
             event_id = existing.data[0]["id"]
