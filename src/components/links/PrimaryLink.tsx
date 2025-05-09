@@ -2,17 +2,9 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-import UnstyledLink, {
-  UnstyledLinkProps,
-} from '@/components/links/UnstyledLink';
+import UnstyledLink, { UnstyledLinkProps } from '@/components/links/UnstyledLink';
 
-type PrimaryLinkVariant =
-  | 'primary'
-  | 'outline'
-  | 'ghost'
-  | 'light'
-  | 'dark'
-  | 'basic';
+type PrimaryLinkVariant = 'primary' | 'outline' | 'ghost' | 'light' | 'dark' | 'basic';
 type PrimaryLinkProps = {
   variant?: PrimaryLinkVariant;
 } & UnstyledLinkProps;

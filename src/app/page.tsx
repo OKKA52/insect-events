@@ -2,10 +2,7 @@
 'use client';
 
 import AreaTag from '@/components/AreaTag';
-import {
-  ArrowTopRightOnSquareIcon,
-  ChevronUpIcon,
-} from '@heroicons/react/24/solid';
+import { ArrowTopRightOnSquareIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
 import { FaFacebookSquare, FaInstagram } from 'react-icons/fa';
 import { prefectures } from '@/utils/prefectures';
 import { useEffect, useRef, useState, useCallback } from 'react';
@@ -59,16 +56,12 @@ const sortByPrefecture = (list: Museum[]): Museum[] => {
 
 const toHalfWidth = (str: string): string => {
   return str
-    .replace(/[！-～]/g, (ch: string) =>
-      String.fromCharCode(ch.charCodeAt(0) - 0xfee0),
-    )
+    .replace(/[！-～]/g, (ch: string) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0))
     .replace(/　/g, ' ');
 };
 
 const katakanaToHiragana = (str: string): string =>
-  str.replace(/[ァ-ヶ]/g, (match: string) =>
-    String.fromCharCode(match.charCodeAt(0) - 0x60),
-  );
+  str.replace(/[ァ-ヶ]/g, (match: string) => String.fromCharCode(match.charCodeAt(0) - 0x60));
 
 export default function HomePage() {
   const [tab, setTab] = useState<'museums' | 'events'>('museums');
@@ -106,21 +99,13 @@ export default function HomePage() {
       if (tab === 'museums') {
         const results = museums.filter((museum) => {
           const name = (museum.name ?? '').normalize('NFC');
-          const nameKana = katakanaToHiragana(museum.name_kana ?? '').normalize(
-            'NFC',
-          );
+          const nameKana = katakanaToHiragana(museum.name_kana ?? '').normalize('NFC');
           const address = (museum.address ?? '').normalize('NFC');
-          const addressKana = katakanaToHiragana(
-            museum.address_kana ?? '',
-          ).normalize('NFC');
+          const addressKana = katakanaToHiragana(museum.address_kana ?? '').normalize('NFC');
           const area = (museum.area ?? '').normalize('NFC');
-          const areaKana = katakanaToHiragana(museum.area_kana ?? '').normalize(
-            'NFC',
-          );
+          const areaKana = katakanaToHiragana(museum.area_kana ?? '').normalize('NFC');
           const pref = (museum.prefecture ?? '').normalize('NFC');
-          const prefKana = katakanaToHiragana(
-            museum.prefecture_kana ?? '',
-          ).normalize('NFC');
+          const prefKana = katakanaToHiragana(museum.prefecture_kana ?? '').normalize('NFC');
 
           return rawKeywords.every((word, i) => {
             const hiraWord = hiraKeywords[i];
@@ -145,19 +130,17 @@ export default function HomePage() {
         const results = events.filter((event) => {
           const title = event.title.normalize('NFC');
           const museumName = event.insect_museums?.name?.normalize('NFC') ?? '';
-          const museumKana = katakanaToHiragana(
-            event.insect_museums?.name_kana ?? '',
-          ).normalize('NFC');
-          const museumAddress =
-            event.insect_museums?.address?.normalize('NFC') ?? '';
+          const museumKana = katakanaToHiragana(event.insect_museums?.name_kana ?? '').normalize(
+            'NFC',
+          );
+          const museumAddress = event.insect_museums?.address?.normalize('NFC') ?? '';
           const museumAddressKana = katakanaToHiragana(
             event.insect_museums?.address_kana ?? '',
           ).normalize('NFC');
           const museumAreaKana = katakanaToHiragana(
             event.insect_museums?.area_kana ?? '',
           ).normalize('NFC');
-          const museumPref =
-            event.insect_museums?.prefecture?.normalize('NFC') ?? '';
+          const museumPref = event.insect_museums?.prefecture?.normalize('NFC') ?? '';
           const museumPrefKana = katakanaToHiragana(
             event.insect_museums?.prefecture_kana ?? '',
           ).normalize('NFC');
@@ -237,8 +220,7 @@ export default function HomePage() {
   useEffect(() => {
     if (clickedMuseumId !== null) {
       const target = museumRefs.current[clickedMuseumId];
-      if (target)
-        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [clickedMuseumId]);
 
@@ -258,10 +240,10 @@ export default function HomePage() {
 
   return (
     <main>
-      <div className='sticky top-0 bg-white dark:bg-gray-900 z-10 shadow'>
+      <div className='sticky top-0 z-10 bg-white shadow dark:bg-gray-900'>
         <div className='p-6 md:p-8 lg:p-10'>
           <h1
-            className='text-2xl md:text-3xl font-bold mb-4 cursor-pointer text-black dark:text-white'
+            className='mb-4 cursor-pointer text-2xl font-bold text-black md:text-3xl dark:text-white'
             onClick={handleClear}
           >
             昆虫館マップ
@@ -270,21 +252,18 @@ export default function HomePage() {
           <div className='mb-4 flex items-center'>
             <button
               onClick={() => setTab('museums')}
-              className={`px-4 py-2 rounded ${tab === 'museums' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-white'}`}
+              className={`rounded px-4 py-2 ${tab === 'museums' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-white'}`}
             >
               昆虫館
             </button>
             <button
               onClick={() => setTab('events')}
-              className={`ml-4 px-4 py-2 rounded ${tab === 'events' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-white'}`}
+              className={`ml-4 rounded px-4 py-2 ${tab === 'events' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-white'}`}
             >
               イベント
             </button>
             <span className='ml-10 text-sm text-gray-600 dark:text-white'>
-              {tab === 'museums'
-                ? filteredMuseums.length
-                : filteredEvents.length}{' '}
-              件
+              {tab === 'museums' ? filteredMuseums.length : filteredEvents.length} 件
             </span>
           </div>
 
@@ -292,17 +271,15 @@ export default function HomePage() {
             <input
               type='text'
               placeholder={
-                tab === 'museums'
-                  ? '施設名や県・エリア名で検索'
-                  : '施設名やイベント名で検索'
+                tab === 'museums' ? '施設名や県・エリア名で検索' : '施設名やイベント名で検索'
               }
               value={searchText}
               onChange={(e) => handleSearch(e.target.value)}
-              className='border rounded p-2 w-full max-w-md text-base bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-600'
+              className='w-full max-w-md rounded border bg-white p-2 text-base text-black dark:border-gray-600 dark:bg-gray-800 dark:text-white'
             />
             <button
               onClick={handleClear}
-              className='px-4 h-10 bg-blue-500 text-white rounded hover:bg-blue-600 whitespace-nowrap text-sm'
+              className='h-10 whitespace-nowrap rounded bg-blue-500 px-4 text-sm text-white hover:bg-blue-600'
             >
               クリア
             </button>
@@ -310,7 +287,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className='relative z-0 p-6 md:p-8 lg:p-10 bg-white dark:bg-gray-900'>
+      <div className='relative z-0 bg-white p-6 md:p-8 lg:p-10 dark:bg-gray-900'>
         <div ref={mapRef} />
         <Map
           key={resetKey}
@@ -332,26 +309,18 @@ export default function HomePage() {
         />
       </div>
 
-      <div className='p-6 md:p-8 lg:p-10 bg-white dark:bg-gray-900'>
+      <div className='bg-white p-6 md:p-8 lg:p-10 dark:bg-gray-900'>
         {tab === 'museums' ? (
-          <h2 className='text-xl font-bold mb-4 text-black dark:text-white'>
-            昆虫館リスト
-          </h2>
+          <h2 className='mb-4 text-xl font-bold text-black dark:text-white'>昆虫館リスト</h2>
         ) : (
-          <div className='flex items-center mb-4'>
-            <h2 className='text-xl font-bold text-black dark:text-white'>
-              イベント一覧
-            </h2>
-            <div className='flex items-center space-x-2 ml-8'>
-              <label className='text-sm text-gray-600 dark:text-gray-300'>
-                開催日順:
-              </label>
+          <div className='mb-4 flex items-center'>
+            <h2 className='text-xl font-bold text-black dark:text-white'>イベント一覧</h2>
+            <div className='ml-8 flex items-center space-x-2'>
+              <label className='text-sm text-gray-600 dark:text-gray-300'>開催日順:</label>
               <select
                 value={eventSortOrder}
-                onChange={(e) =>
-                  setEventSortOrder(e.target.value as 'asc' | 'desc')
-                }
-                className='border p-1 rounded text-sm bg-white dark:bg-gray-800 dark:text-white dark:border-gray-600'
+                onChange={(e) => setEventSortOrder(e.target.value as 'asc' | 'desc')}
+                className='rounded border bg-white p-1 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white'
               >
                 <option value='asc'>近い順</option>
                 <option value='desc'>遠い順</option>
@@ -360,48 +329,48 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className='p-6 md:p-8 lg:p-10 bg-white dark:bg-gray-900'>
+        <div className='bg-white p-6 md:p-8 lg:p-10 dark:bg-gray-900'>
           {tab === 'museums' ? (
             filteredMuseums.length === 0 ? (
-              <div className='text-gray-600 dark:text-gray-300 text-sm mt-4'>
+              <div className='mt-4 text-sm text-gray-600 dark:text-gray-300'>
                 <p>該当する昆虫館が見つかりませんでした。</p>
                 {searchText && (
-                  <ul className='list-disc list-inside mt-2 space-y-1'>
+                  <ul className='mt-2 list-inside list-disc space-y-1'>
                     <li>キーワードを変更して再度検索してください。</li>
                     <li>施設名やエリア名での検索をお試しください。</li>
                   </ul>
                 )}
               </div>
             ) : (
-              <ul className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
+              <ul className='mt-6 grid grid-cols-1 gap-6 md:grid-cols-2'>
                 {sortedMuseums.map((museum) => (
                   <li
                     key={museum.id}
                     ref={(el) => {
                       museumRefs.current[museum.id] = el;
                     }}
-                    className={`border p-4 rounded-lg shadow transition ${
+                    className={`rounded-lg border p-4 shadow transition ${
                       hoveredMuseumId === museum.id
                         ? 'bg-yellow-100 dark:bg-yellow-900'
                         : 'hover:shadow-md dark:border-gray-600 dark:bg-gray-800'
                     }`}
                   >
-                    <h2 className='text-lg md:text-xl font-semibold text-black dark:text-white'>
+                    <h2 className='text-lg font-semibold text-black md:text-xl dark:text-white'>
                       {museum.name}
                     </h2>
-                    <div className='flex items-center space-x-2 mt-1'>
+                    <div className='mt-1 flex items-center space-x-2'>
                       {museum.area && <AreaTag area={museum.area} />}
-                      <p className='text-sm md:text-base text-gray-600 dark:text-gray-300'>
+                      <p className='text-sm text-gray-600 md:text-base dark:text-gray-300'>
                         {museum.address}
                       </p>
                     </div>
-                    <div className='flex items-center space-x-3 md:space-x-5 mt-3'>
+                    <div className='mt-3 flex items-center space-x-3 md:space-x-5'>
                       {museum.url && (
                         <a
                           href={museum.url}
                           target='_blank'
                           rel='noopener noreferrer'
-                          className='text-blue-600 hover:underline flex items-center'
+                          className='flex items-center text-blue-600 hover:underline'
                         >
                           <ArrowTopRightOnSquareIcon className='h-5 w-5 text-blue-600 dark:text-gray-300' />
                           <span className='ml-1 text-sm md:text-blue-600 dark:text-gray-300'>
@@ -431,7 +400,7 @@ export default function HomePage() {
                             alt='X'
                             width={23}
                             height={23}
-                            className='h-6 w-6 object-contain mt-[1px] rounded hover:opacity-80'
+                            className='mt-[1px] h-6 w-6 rounded object-contain hover:opacity-80'
                           />
                         </a>
                       )}
@@ -451,21 +420,21 @@ export default function HomePage() {
               </ul>
             )
           ) : sortedEvents.length === 0 ? (
-            <div className='text-gray-600 dark:text-gray-300 text-sm mt-4'>
+            <div className='mt-4 text-sm text-gray-600 dark:text-gray-300'>
               <p>該当するイベントが見つかりませんでした。</p>
               {searchText && (
-                <ul className='list-disc list-inside mt-2 space-y-1'>
+                <ul className='mt-2 list-inside list-disc space-y-1'>
                   <li>キーワードを変更して再度検索してください。</li>
                   <li>施設名やエリア名での検索をお試しください。</li>
                 </ul>
               )}
             </div>
           ) : (
-            <ul className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
+            <ul className='mt-6 grid grid-cols-1 gap-6 md:grid-cols-2'>
               {sortedEvents.map((event) => (
                 <li
                   key={event.id}
-                  className='border p-4 rounded-lg shadow hover:shadow-md dark:border-gray-600 dark:bg-gray-800'
+                  className='rounded-lg border p-4 shadow hover:shadow-md dark:border-gray-600 dark:bg-gray-800'
                 >
                   <h2 className='text-lg font-semibold text-black dark:text-white'>
                     {event.title}
@@ -473,7 +442,7 @@ export default function HomePage() {
                   <p className='text-sm text-gray-600 dark:text-gray-300'>
                     {event.insect_museums?.name || '施設不明'}
                   </p>
-                  <p className='text-sm mt-1 text-gray-700 dark:text-gray-400'>
+                  <p className='mt-1 text-sm text-gray-700 dark:text-gray-400'>
                     {event.start_date} ～ {event.end_date}
                   </p>
                   {event.event_url && (
@@ -481,7 +450,7 @@ export default function HomePage() {
                       href={event.event_url}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='text-blue-600 dark:text-gray-300 text-sm hover:underline'
+                      className='text-sm text-blue-600 hover:underline dark:text-gray-300'
                     >
                       詳細はこちら
                     </a>
@@ -494,7 +463,7 @@ export default function HomePage() {
         {showScrollTop && (
           <button
             onClick={scrollToTop}
-            className='fixed bottom-6 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition'
+            className='fixed bottom-6 right-6 rounded-full bg-blue-600 p-3 text-white shadow-lg transition hover:bg-blue-700'
             aria-label='ページトップへ'
           >
             <ChevronUpIcon className='h-6 w-6' />

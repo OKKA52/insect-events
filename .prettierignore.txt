@@ -40,3 +40,10 @@ eslint.config.js
 .env.example
 
 CHANGELOG.md
+
+# Python仮想環境除外
+venv/
+venv/*
+venv/**
+__pycache__/
+*.pyc

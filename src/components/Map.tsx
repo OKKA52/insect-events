@@ -26,18 +26,13 @@ type MapProps = {
   resetKey?: number;
 };
 
-const MapContainer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.MapContainer),
-  { ssr: false },
-);
-const TileLayer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.TileLayer),
-  { ssr: false },
-);
-const Marker = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Marker),
-  { ssr: false },
-);
+const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), {
+  ssr: false,
+});
+const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), {
+  ssr: false,
+});
+const Marker = dynamic(() => import('react-leaflet').then((mod) => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
   ssr: false,
 });
@@ -70,9 +65,7 @@ function AutoFitBounds({ museums }: { museums: Museum[] }) {
                 map.setView([pins[0].latitude!, pins[0].longitude!], 9);
               } else {
                 const bounds = L.latLngBounds(
-                  pins.map(
-                    (m) => [m.latitude!, m.longitude!] as [number, number],
-                  ),
+                  pins.map((m) => [m.latitude!, m.longitude!] as [number, number]),
                 );
                 map.fitBounds(bounds, { padding: [50, 50] });
               }
@@ -90,15 +83,8 @@ function AutoFitBounds({ museums }: { museums: Museum[] }) {
   return null;
 }
 
-export default function Map({
-  museums,
-  onHoverMuseum,
-  onClickMuseum,
-  resetKey,
-}: MapProps) {
-  const [lastTappedMarkerId, setLastTappedMarkerId] = useState<number | null>(
-    null,
-  );
+export default function Map({ museums, onHoverMuseum, onClickMuseum, resetKey }: MapProps) {
+  const [lastTappedMarkerId, setLastTappedMarkerId] = useState<number | null>(null);
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 
   useEffect(() => {
@@ -191,7 +177,7 @@ export default function Map({
             <Popup maxWidth={300} minWidth={200} offset={[0, -30]}>
               <div className='text-sm'>
                 {museum.image_url && (
-                  <div className='w-full h-32 relative rounded mb-2 overflow-hidden'>
+                  <div className='relative mb-2 h-32 w-full overflow-hidden rounded'>
                     <Image
                       src={museum.image_url}
                       alt={museum.name}
@@ -200,8 +186,8 @@ export default function Map({
                     />
                   </div>
                 )}
-                <h3 className='text-base font-bold mb-1'>{museum.name}</h3>
-                <p className='text-gray-600 mb-2'>{museum.address}</p>
+                <h3 className='mb-1 text-base font-bold'>{museum.name}</h3>
+                <p className='mb-2 text-gray-600'>{museum.address}</p>
                 <div className='flex flex-wrap gap-2 text-xs'>
                   {museum.url && (
                     <a

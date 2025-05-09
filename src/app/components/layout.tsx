@@ -8,10 +8,6 @@ export const metadata: Metadata = {
   description: 'Pre-built components with awesome default',
 };
 
-export default function ComponentsLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ComponentsLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

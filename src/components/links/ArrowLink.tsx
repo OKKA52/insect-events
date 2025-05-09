@@ -23,11 +23,7 @@ export default function ArrowLink<C extends React.ElementType>({
   return (
     <Component
       {...rest}
-      className={cn(
-        'group gap-[0.25em]',
-        direction === 'left' && 'flex-row-reverse',
-        className,
-      )}
+      className={cn('group gap-[0.25em]', direction === 'left' && 'flex-row-reverse', className)}
     >
       <span>{children}</span>
       <svg

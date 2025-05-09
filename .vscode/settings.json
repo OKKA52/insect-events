@@ -1,18 +1,37 @@
 {
+  // ✅ CSSのLintをオフ（Tailwindの構文エラー防止）
   "css.validate": false,
+  // ✅ 保存時の自動フォーマット
   "editor.formatOnSave": true,
   "editor.tabSize": 2,
+  // ✅ 保存時にESLintによる全修正を実行（より汎用的に）
   "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit"
+    "source.fixAll": "explicit",
+    "source.fixAll.eslint": "explicit"
   },
+  // ✅ CSSファイルはPrettierで整形
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "tailwindCSS.classAttributes": [
-    "class",
-    "className",
-    "classNames",
-    "containerClassName"
+  // ✅ Tailwind CSSクラス名補完設定
+  "tailwindCSS.classAttributes": ["class", "className", "classNames", "containerClassName"],
+  "tailwindCSS.includeLanguages": {
+    "plaintext": "html",
+    "javascript": "javascript",
+    "typescript": "typescript",
+    "javascriptreact": "javascript",
+    "typescriptreact": "typescript"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["clsx\\(([^)]*)\\)", "[\"'`]([^\"'`]*)[\"'`]"],
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*)[\"'`]"]
   ],
-  "typescript.preferences.importModuleSpecifier": "non-relative"
+  // ✅ Better Comments拡張のためのオプション
+  "better-comments.highlightPlainText": true,
+  // ✅ TypeScriptインポートの自動更新
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  // ✅ ファイル末尾に改行を自動追加
+  "files.insertFinalNewline": true
 }

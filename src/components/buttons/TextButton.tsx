@@ -2,29 +2,14 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-type TextButtonVariant =
-  | 'primary'
-  | 'outline'
-  | 'ghost'
-  | 'light'
-  | 'dark'
-  | 'basic';
+type TextButtonVariant = 'primary' | 'outline' | 'ghost' | 'light' | 'dark' | 'basic';
 
 type TextButtonProps = {
   variant?: TextButtonVariant;
 } & React.ComponentPropsWithRef<'button'>;
 
 const TextButton = React.forwardRef<HTMLButtonElement, TextButtonProps>(
-  (
-    {
-      children,
-      className,
-      variant = 'primary',
-      disabled: buttonDisabled,
-      ...rest
-    },
-    ref,
-  ) => {
+  ({ children, className, variant = 'primary', disabled: buttonDisabled, ...rest }, ref) => {
     return (
       <button
         ref={ref}

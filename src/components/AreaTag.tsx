@@ -9,7 +9,7 @@ export default function AreaTag({ area }: { area: string }) {
 
   return (
     <span
-      className={`inline-block border border-gray-300 text-xs md:text-sm font-semibold px-3 py-1 rounded self-start shrink-0 ${className}`}
+      className={`inline-block shrink-0 self-start rounded border border-gray-300 px-3 py-1 text-xs font-semibold md:text-sm ${className}`}
     >
       {area}
     </span>

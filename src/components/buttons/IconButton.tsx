@@ -58,15 +58,13 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
               'text-primary-500',
               'border-primary-500 border',
               'hover:bg-primary-50 active:bg-primary-100 disabled:bg-primary-100',
-              isDarkBg &&
-                'hover:bg-gray-900 active:bg-gray-800 disabled:bg-gray-800',
+              isDarkBg && 'hover:bg-gray-900 active:bg-gray-800 disabled:bg-gray-800',
             ],
             variant === 'ghost' && [
               'text-primary-500',
               'shadow-none',
               'hover:bg-primary-50 active:bg-primary-100 disabled:bg-primary-100',
-              isDarkBg &&
-                'hover:bg-gray-900 active:bg-gray-800 disabled:bg-gray-800',
+              isDarkBg && 'hover:bg-gray-900 active:bg-gray-800 disabled:bg-gray-800',
             ],
             variant === 'light' && [
               'bg-white text-gray-700',
@@ -90,14 +88,11 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       >
         {isLoading && (
           <div
-            className={cn(
-              'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2',
-              {
-                'text-white': ['primary', 'dark'].includes(variant),
-                'text-black': ['light'].includes(variant),
-                'text-primary-500': ['outline', 'ghost'].includes(variant),
-              },
-            )}
+            className={cn('absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2', {
+              'text-white': ['primary', 'dark'].includes(variant),
+              'text-black': ['light'].includes(variant),
+              'text-primary-500': ['outline', 'ghost'].includes(variant),
+            })}
           >
             <ImSpinner2 className='animate-spin' />
           </div>
