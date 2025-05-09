@@ -7,9 +7,15 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
 import os
+import json, os
 
-# ✅ .env.test を明示的に読み込む
-load_dotenv(dotenv_path=".env.test")
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+with open(os.path.join(BASE_DIR, "exclude_keywords.json"), "r", encoding="utf-8") as f:
+    EXCLUDE_KEYWORDS = json.load(f)
+
+# スクリプト位置からルートの .env.test を参照
+dotenv_path = os.path.join(BASE_DIR, ".env.test")
+load_dotenv(dotenv_path=dotenv_path)
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
@@ -103,6 +109,11 @@ def fetch_events():
                 date_text = clean_text(date_el.text if date_el else "")
                 description = clean_text(description_el.text if description_el else "")
                 description = remove_duplicate_sentences(description)
+
+                # ① 別ファイルのリストで除外判定
+                if any(kw in title for kw in EXCLUDE_KEYWORDS):
+                    print(f"⚠️ 除外ワード検出 → スキップ: {title}")
+                    continue
 
                 print(f"📝 タイトル: {title}")
                 print(f"📅 日付テキスト: {date_text}")
