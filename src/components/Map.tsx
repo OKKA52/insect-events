@@ -24,6 +24,7 @@ type MapProps = {
   onHoverMuseum: (_id: number | null) => void;
   onClickMuseum: (_id: number) => void;
   resetKey?: number;
+  eventCounts?: Map<number, number>;
 };
 
 const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), {
@@ -83,7 +84,13 @@ function AutoFitBounds({ museums }: { museums: Museum[] }) {
   return null;
 }
 
-export default function Map({ museums, onHoverMuseum, onClickMuseum, resetKey }: MapProps) {
+export default function Map({
+  museums,
+  onHoverMuseum,
+  onClickMuseum,
+  resetKey,
+  eventCounts,
+}: MapProps) {
   const [lastTappedMarkerId, setLastTappedMarkerId] = useState<number | null>(null);
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 
@@ -188,6 +195,13 @@ export default function Map({ museums, onHoverMuseum, onClickMuseum, resetKey }:
                 )}
                 <h3 className='mb-1 text-base font-bold'>{museum.name}</h3>
                 <p className='mb-2 text-gray-600'>{museum.address}</p>
+
+                {eventCounts?.get(museum.id) !== undefined && (
+                  <p className='mb-2 text-gray-800'>
+                    開催イベント数: <strong>{eventCounts.get(museum.id)}</strong>
+                  </p>
+                )}
+
                 <div className='flex flex-wrap gap-2 text-xs'>
                   {museum.url && (
                     <a

@@ -7,7 +7,7 @@ import { FaFacebookSquare, FaInstagram } from 'react-icons/fa';
 import { prefectures } from '@/utils/prefectures';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import Map from '@/components/Map';
+import InsectMap from '@/components/Map';
 import Image from 'next/image';
 
 // 型定義
@@ -186,6 +186,14 @@ export default function HomePage() {
     return eventSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
   });
 
+  const eventCountMap = new Map<number, number>();
+  sortedEvents.forEach((event) => {
+    const museum = event.insect_museums;
+    if (museum) {
+      eventCountMap.set(museum.id, (eventCountMap.get(museum.id) ?? 0) + 1);
+    }
+  });
+
   const sortedMuseums = sortByPrefecture(filteredMuseums);
 
   const eventMuseumList = sortedEvents
@@ -195,9 +203,9 @@ export default function HomePage() {
     );
 
   const eventMuseumEntries = eventMuseumList.map((m) => [m.id, m] as [number, Museum]);
-  const eventMuseumMap = new globalThis.Map<number, Museum>(
-    eventMuseumEntries as [number, Museum][],
-  );
+
+  const eventMuseumMap: Map<number, Museum> = new globalThis.Map(eventMuseumEntries);
+
   const uniqueEventMuseums: Museum[] = Array.from(eventMuseumMap.values());
 
   const handleClear = () => {
@@ -312,11 +320,12 @@ export default function HomePage() {
 
       <div className='relative z-0 bg-white p-6 md:p-8 lg:p-10 dark:bg-gray-900'>
         <div ref={mapRef} />
-        <Map
+        <InsectMap
           key={resetKey}
           museums={tab === 'museums' ? sortedMuseums : uniqueEventMuseums}
           onHoverMuseum={setHoveredMuseumId}
           onClickMuseum={setClickedMuseumId}
+          eventCounts={tab === 'events' ? eventCountMap : undefined}
         />
       </div>
 
