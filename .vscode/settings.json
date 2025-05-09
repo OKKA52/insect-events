@@ -2,6 +2,7 @@
   // ✅ CSSのLintをオフ（Tailwindの構文エラー防止）
   "css.validate": false,
   // ✅ 保存時の自動フォーマット
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "editor.tabSize": 2,
   // ✅ 保存時にESLintによる全修正を実行（より汎用的に）

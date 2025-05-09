@@ -76,7 +76,18 @@ export default function HomePage() {
   const [resetKey, setResetKey] = useState(0);
   const museumRefs = useRef<Record<number, HTMLLIElement | null>>({});
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = typeof window.scrollY === 'number' ? window.scrollY : 0;
+      setShowScrollTop(scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleSearch = useCallback(
     (value: string) => {
@@ -175,6 +186,20 @@ export default function HomePage() {
     return eventSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
   });
 
+  const sortedMuseums = sortByPrefecture(filteredMuseums);
+
+  const eventMuseumList = sortedEvents
+    .map((e) => e.insect_museums)
+    .filter(
+      (m): m is Museum => !!m && typeof m.latitude === 'number' && typeof m.longitude === 'number',
+    );
+
+  const eventMuseumEntries = eventMuseumList.map((m) => [m.id, m] as [number, Museum]);
+  const eventMuseumMap = new globalThis.Map<number, Museum>(
+    eventMuseumEntries as [number, Museum][],
+  );
+  const uniqueEventMuseums: Museum[] = Array.from(eventMuseumMap.values());
+
   const handleClear = () => {
     setSearchText('');
     setFilteredMuseums(museums);
@@ -190,8 +215,6 @@ export default function HomePage() {
       }
     }, 100);
   };
-
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   useEffect(() => {
     const fetchMuseums = async () => {
@@ -225,7 +248,9 @@ export default function HomePage() {
   }, [clickedMuseumId]);
 
   useEffect(() => {
-    const handleScroll = () => setShowScrollTop(window.scrollY > 300);
+    const handleScroll = () => {
+      setShowScrollTop((window.scrollY ?? 0) > 300);
+    };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -235,8 +260,6 @@ export default function HomePage() {
       handleSearch(searchText);
     }
   }, [tab, searchText, handleSearch]);
-
-  const sortedMuseums = sortByPrefecture(filteredMuseums);
 
   return (
     <main>
@@ -291,19 +314,7 @@ export default function HomePage() {
         <div ref={mapRef} />
         <Map
           key={resetKey}
-          museums={
-            tab === 'museums'
-              ? sortedMuseums
-              : (sortedEvents
-                  .map((e) => ({
-                    id: e.id,
-                    name: e.title,
-                    latitude: e.insect_museums?.latitude,
-                    longitude: e.insect_museums?.longitude,
-                    address: e.insect_museums?.address,
-                  }))
-                  .filter((e) => e.latitude && e.longitude) as Museum[])
-          }
+          museums={tab === 'museums' ? sortedMuseums : uniqueEventMuseums}
           onHoverMuseum={setHoveredMuseumId}
           onClickMuseum={setClickedMuseumId}
         />
