@@ -119,7 +119,7 @@ export default function Map({
         url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
       />
       <AutoFitBounds museums={museums} /> {/* ← ✅ 常時表示でOK */}
-      {museums.map((museum) => {
+      {museums.map((museum, index) => {
         if (!museum.latitude || !museum.longitude) return null;
 
         return (
@@ -189,6 +189,7 @@ export default function Map({
                       src={museum.image_url}
                       alt={museum.name}
                       fill
+                      priority={index === 0}
                       style={{ objectFit: 'cover' }}
                     />
                   </div>
