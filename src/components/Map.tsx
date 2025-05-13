@@ -185,7 +185,7 @@ export default function Map({
               <Popup maxWidth={300} minWidth={200} offset={[0, -30]}>
                 <div className='text-sm'>
                   {museum.image_url && (
-                    <div className='relative mb-2 h-32 w-full overflow-hidden rounded'>
+                    <div className='relative mb-2 aspect-[4/3] h-32 w-full overflow-hidden rounded'>
                       <Image
                         src={museum.image_url}
                         alt={museum.name}
