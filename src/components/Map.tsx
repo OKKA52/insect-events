@@ -99,6 +99,20 @@ export default function Map({
     setIsMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (!isMounted) return;
+
+    import('leaflet').then((L) => {
+      const DefaultIcon = L.icon({
+        iconUrl: '/leaflet/marker-icon.png',
+        shadowUrl: '/leaflet/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+      });
+      L.Marker.prototype.options.icon = DefaultIcon;
+    });
+  }, [isMounted]);
+
   if (!isMounted) {
     // プレースホルダー（高さ確保）
     return <div style={{ height: '500px', width: '100%' }} className='bg-gray-200' />;
