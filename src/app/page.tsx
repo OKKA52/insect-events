@@ -78,7 +78,11 @@ export default function HomePage() {
   const museumRefs = useRef<Record<number, HTMLLIElement | null>>({});
   const mapRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollToTop = () => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   useEffect(() => {
@@ -220,7 +224,7 @@ export default function HomePage() {
     setResetKey((prev) => prev + 1);
     setTimeout(() => {
       const el = mapRef.current;
-      if (el) {
+      if (el && typeof window !== 'undefined') {
         const y = el.getBoundingClientRect().top + window.scrollY - 220;
         window.scrollTo({ top: y, behavior: 'smooth' });
       }
@@ -260,7 +264,10 @@ export default function HomePage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setShowScrollTop((window.scrollY ?? 0) > 300);
+      if (typeof window !== 'undefined') {
+        const scrollY = window.scrollY;
+        setShowScrollTop(scrollY > 300);
+      }
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
