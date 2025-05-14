@@ -87,11 +87,20 @@ export default function HomePage() {
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   useEffect(() => {
     const handleScroll = () => {
-      const scrollY = typeof window.scrollY === 'number' ? window.scrollY : 0;
-      setShowScrollTop(scrollY > 300);
+      if (typeof window !== 'undefined') {
+        setShowScrollTop(window.scrollY > 300);
+      }
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('scroll', handleScroll);
+      }
+    };
   }, []);
 
   const handleSearch = useCallback(
