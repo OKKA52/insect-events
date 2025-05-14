@@ -216,7 +216,14 @@ export default function HomePage() {
       (m): m is Museum => !!m && typeof m.latitude === 'number' && typeof m.longitude === 'number',
     );
 
-  const visibleMuseums = sortedMuseums.filter((m: Museum) => visibleMuseumIds.includes(m.id));
+  const [visibleMuseums, setVisibleMuseums] = useState<Museum[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const filtered = sortedMuseums.filter((m) => visibleMuseumIds.includes(m.id));
+      setVisibleMuseums(filtered);
+    }
+  }, [visibleMuseumIds, sortedMuseums]);
 
   const eventMuseumEntries = eventMuseumList.map((m) => [m.id, m] as [number, Museum]);
 
