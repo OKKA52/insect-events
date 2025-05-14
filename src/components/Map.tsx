@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import BoundsSync from './BoundsSync';
+import L from 'leaflet';
 
 type Museum = {
   id: number;
