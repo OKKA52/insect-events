@@ -64,6 +64,7 @@ const katakanaToHiragana = (str: string): string =>
   str.replace(/[ァ-ヶ]/g, (match: string) => String.fromCharCode(match.charCodeAt(0) - 0x60));
 
 export default function HomePage() {
+  const [visibleMuseumIds, setVisibleMuseumIds] = useState<number[]>([]);
   const [tab, setTab] = useState<'museums' | 'events'>('museums');
   const [museums, setMuseums] = useState<Museum[]>([]);
   const [events, setEvents] = useState<EventWithMuseum[]>([]);
@@ -202,6 +203,8 @@ export default function HomePage() {
       (m): m is Museum => !!m && typeof m.latitude === 'number' && typeof m.longitude === 'number',
     );
 
+  const visibleMuseums = sortedMuseums.filter((m: Museum) => visibleMuseumIds.includes(m.id));
+
   const eventMuseumEntries = eventMuseumList.map((m) => [m.id, m] as [number, Museum]);
 
   const eventMuseumMap: Map<number, Museum> = new globalThis.Map(eventMuseumEntries);
@@ -326,6 +329,7 @@ export default function HomePage() {
           onHoverMuseum={setHoveredMuseumId}
           onClickMuseum={setClickedMuseumId}
           eventCounts={tab === 'events' ? eventCountMap : undefined}
+          setVisibleMuseumIds={tab === 'museums' ? setVisibleMuseumIds : undefined}
         />
       </div>
 
@@ -363,7 +367,7 @@ export default function HomePage() {
               </div>
             ) : (
               <ul className='mt-6 grid grid-cols-1 gap-6 md:grid-cols-2'>
-                {sortedMuseums.map((museum) => (
+                {visibleMuseums.map((museum) => (
                   <li
                     key={museum.id}
                     ref={(el) => {
