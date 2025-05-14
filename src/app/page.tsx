@@ -264,13 +264,19 @@ export default function HomePage() {
 
   useEffect(() => {
     const handleScroll = () => {
+      const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+      setShowScrollTop(scrollY > 300);
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
       if (typeof window !== 'undefined') {
-        const scrollY = window.scrollY;
-        setShowScrollTop(scrollY > 300);
+        window.removeEventListener('scroll', handleScroll);
       }
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
