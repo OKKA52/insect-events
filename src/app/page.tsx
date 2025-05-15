@@ -130,6 +130,7 @@ export default function HomePage() {
           const museumAddressKana = katakanaToHiragana(
             event.insect_museums?.address_kana ?? '',
           ).normalize('NFC');
+          const museumArea = event.insect_museums?.area?.normalize('NFC') ?? '';
           const museumAreaKana = katakanaToHiragana(
             event.insect_museums?.area_kana ?? '',
           ).normalize('NFC');
@@ -148,6 +149,7 @@ export default function HomePage() {
               museumAddress.includes(word) ||
               museumAddress.includes(hiraWord) ||
               museumAddressKana.includes(hiraWord) ||
+              museumArea.includes(word) ||
               museumAreaKana.includes(hiraWord) ||
               museumPref.includes(word) ||
               museumPrefKana.includes(hiraWord)

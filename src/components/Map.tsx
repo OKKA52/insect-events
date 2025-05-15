@@ -12,13 +12,19 @@ type Museum = {
   id: number;
   name: string;
   address: string;
-  latitude?: number;
-  longitude?: number;
-  url?: string;
-  instagram_url?: string;
+  url: string;
   facebook_url?: string;
   x_url?: string;
+  instagram_url?: string;
   image_url?: string;
+  area?: string;
+  name_kana?: string;
+  prefecture?: string;
+  address_kana?: string;
+  latitude?: number;
+  longitude?: number;
+  area_kana?: string;
+  prefecture_kana?: string;
 };
 
 type MapProps = {
