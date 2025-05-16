@@ -203,7 +203,10 @@ export default function HomePage() {
 
   useEffect(() => {
     if (museums.length > 0) {
-      setVisibleMuseumIds(museums.map((m) => m.id));
+      const allIds = museums.map((m) => m.id);
+      setVisibleMuseumIds(allIds);
+      setResetKey((k) => k + 1);
+      //setVisibleMuseumIds(museums.map((m) => m.id));
     }
   }, [museums]);
 
