@@ -102,16 +102,20 @@ export default function HomeClient({
       )
     : visibleMuseums;
 
+  const eventsInMap = sortedEvents.filter(
+    (event) => event.insect_museums && visibleMuseumIds.includes(event.insect_museums.id),
+  );
+
   const filteredEvents = searchText.trim()
-    ? sortedEvents.filter((event) => {
+    ? eventsInMap.filter((event) => {
         const title = event.title ?? '';
         const museumName = event.insect_museums?.name ?? '';
         const area = event.insect_museums?.area ?? '';
-        return [title, museumName, area].some((v) => v.includes(searchText));
+        const prefecture = event.insect_museums?.prefecture ?? '';
+        const address = event.insect_museums?.address ?? '';
+        return [title, museumName, area, prefecture, address].some((v) => v.includes(searchText));
       })
-    : sortedEvents.filter(
-        (event) => event.insect_museums && visibleMuseumIds.includes(event.insect_museums.id),
-      );
+    : eventsInMap;
 
   return (
     <main>
@@ -170,7 +174,7 @@ export default function HomeClient({
           onHoverMuseum={setHoveredMuseumId}
           onClickMuseum={setClickedMuseumId}
           eventCounts={tab === 'events' ? eventCountMap : undefined}
-          setVisibleMuseumIds={tab === 'museums' ? setVisibleMuseumIds : undefined}
+          setVisibleMuseumIds={setVisibleMuseumIds}
         />
       </div>
 
@@ -290,7 +294,7 @@ export default function HomeClient({
                 ))}
               </ul>
             )
-          ) : sortedEvents.length === 0 ? (
+          ) : filteredEvents.length === 0 ? (
             <div className='mt-4 text-sm text-gray-600 dark:text-gray-300'>
               <p>該当するイベントが見つかりませんでした。</p>
               {searchText && (

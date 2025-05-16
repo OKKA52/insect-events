@@ -47,8 +47,11 @@ export default function HomePage() {
   const [hoveredMuseumId, setHoveredMuseumId] = useState<number | null>(null);
   const [, setClickedMuseumId] = useState<number | null>(null);
   const [visibleMuseumIds, setVisibleMuseumIds] = useState<number[]>([]);
+  //const [visibleMuseumIds, setVisibleMuseumIds] = useState<number[]>(allMuseumIds);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const museumRefs = useRef<Record<number, HTMLLIElement | null>>({});
+  //const mapRef = useRef<HTMLDivElement | null>(null);
+  //const mapRef = useRef<L.Map | null>(null);
   const mapRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToTop = () => {
@@ -70,6 +73,10 @@ export default function HomePage() {
         const y = el.getBoundingClientRect().top + window.scrollY - 220;
         window.scrollTo({ top: y, behavior: 'smooth' });
       }
+      //if (mapRef.current) {
+      //  mapRef.current.setView(DEFAULT_CENTER, 5);
+      //}
+      setVisibleMuseumIds(museums.map((m) => m.id));
     }, 100);
   };
 
@@ -192,6 +199,12 @@ export default function HomePage() {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (museums.length > 0) {
+      setVisibleMuseumIds(museums.map((m) => m.id));
+    }
+  }, [museums]);
 
   useEffect(() => {
     if (searchText !== '') {
