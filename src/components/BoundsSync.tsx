@@ -33,9 +33,12 @@ export default function BoundsSync({ museums, onChangeVisibleMuseumIds }: Bounds
       )
       .map((m) => m.id);
 
-    const prevIds = prevIdsRef.current;
+    // 並び順が違っても同一判定されるようにソートして比較
+    const sortedNew = [...visibleIds].sort((a, b) => a - b);
+    const sortedPrev = [...prevIdsRef.current].sort((a, b) => a - b);
     const changed =
-      visibleIds.length !== prevIds.length || !visibleIds.every((id, idx) => id === prevIds[idx]);
+      sortedNew.length !== sortedPrev.length ||
+      !sortedNew.every((id, idx) => id === sortedPrev[idx]);
 
     if (changed) {
       prevIdsRef.current = visibleIds;
@@ -52,7 +55,9 @@ export default function BoundsSync({ museums, onChangeVisibleMuseumIds }: Bounds
 
   useEffect(() => {
     updateVisible();
-  }, [updateVisible]);
+    // 初回マウント時のみ実行（map取得後）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return null;
 }

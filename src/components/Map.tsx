@@ -59,40 +59,35 @@ function AutoFitBounds({ museums }: { museums: Museum[] }) {
   useEffect(() => {
     if (hasFittedRef.current) return;
 
-    const updateBounds = async () => {
-      const pins = museums.filter((m) => m.latitude && m.longitude);
-      const L = await import('leaflet');
+    const pins = museums.filter((m) => m.latitude && m.longitude);
 
-      map.whenReady(() => {
-        try {
-          map.invalidateSize();
-        } catch (e) {
-          console.warn('⚠️ invalidateSize error:', e);
-        }
+    map.whenReady(() => {
+      try {
+        map.invalidateSize();
+      } catch (e) {
+        console.warn('⚠️ invalidateSize error:', e);
+      }
 
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            try {
-              if (pins.length === 0) {
-                map.setView([36.2048, 138.2529], 5);
-              } else if (pins.length === 1) {
-                map.setView([pins[0].latitude!, pins[0].longitude!], 9);
-              } else {
-                const bounds = L.latLngBounds(
-                  pins.map((m) => [m.latitude!, m.longitude!] as [number, number]),
-                );
-                map.fitBounds(bounds, { padding: [50, 50] });
-              }
-              hasFittedRef.current = true; // ✅ 初回ズームのみ実行
-            } catch (err) {
-              console.warn('❗ setView/fitBounds error:', err);
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          try {
+            if (pins.length === 0) {
+              map.setView([36.2048, 138.2529], 5);
+            } else if (pins.length === 1) {
+              map.setView([pins[0].latitude!, pins[0].longitude!], 9);
+            } else {
+              const bounds = L.latLngBounds(
+                pins.map((m) => [m.latitude!, m.longitude!] as [number, number]),
+              );
+              map.fitBounds(bounds, { padding: [50, 50] });
             }
-          }, 50);
-        });
+            hasFittedRef.current = true;
+          } catch (err) {
+            console.warn('❗ setView/fitBounds error:', err);
+          }
+        }, 50);
       });
-    };
-
-    updateBounds();
+    });
   }, [map, museums]);
 
   return null;

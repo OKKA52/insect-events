@@ -254,9 +254,10 @@ export default function HomePage() {
       setClickedMuseumId={setClickedMuseumId}
       eventSortOrder={eventSortOrder}
       setEventSortOrder={setEventSortOrder}
-      filteredMuseums={filteredMuseums}
-      filteredEvents={filteredEvents}
+      // filteredMuseums={filteredMuseums}
+      // filteredEvents={filteredEvents}
       visibleMuseums={visibleMuseums}
+      visibleMuseumIds={visibleMuseumIds}
       eventCountMap={eventCountMap}
       museumRefs={museumRefs}
       mapRef={mapRef}

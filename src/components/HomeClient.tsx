@@ -6,6 +6,7 @@ import { ArrowTopRightOnSquareIcon, ChevronUpIcon } from '@heroicons/react/24/so
 import { FaFacebookSquare, FaInstagram } from 'react-icons/fa';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+// import { useState } from 'react';
 
 const InsectMap = dynamic(() => import('@/components/Map'), {
   ssr: false,
@@ -53,8 +54,9 @@ interface HomeClientProps {
   setClickedMuseumId: (id: number | null) => void;
   eventSortOrder: 'asc' | 'desc';
   setEventSortOrder: (order: 'asc' | 'desc') => void;
-  filteredMuseums: Museum[];
-  filteredEvents: EventWithMuseum[];
+  // filteredMuseums: Museum[];
+  // filteredEvents: EventWithMuseum[];
+  visibleMuseumIds: number[];
   visibleMuseums: Museum[];
   eventCountMap: Map<number, number>;
   museumRefs: React.MutableRefObject<Record<number, HTMLLIElement | null>>;
@@ -79,9 +81,10 @@ export default function HomeClient({
   setClickedMuseumId,
   eventSortOrder,
   setEventSortOrder,
-  filteredMuseums,
-  filteredEvents,
+  // filteredMuseums,
+  // filteredEvents,
   visibleMuseums,
+  visibleMuseumIds,
   eventCountMap,
   museumRefs,
   mapRef,
@@ -91,6 +94,25 @@ export default function HomeClient({
   sortedEvents,
   hoveredMuseumId,
 }: HomeClientProps) {
+  // const [visibleMuseumIds, setVisibleMuseumIds] = useState<number[]>([]);
+
+  const filteredMuseums = searchText.trim()
+    ? sortedMuseums.filter((museum) =>
+        [museum.name, museum.prefecture, museum.area].some((v) => (v ?? '').includes(searchText)),
+      )
+    : visibleMuseums;
+
+  const filteredEvents = searchText.trim()
+    ? sortedEvents.filter((event) => {
+        const title = event.title ?? '';
+        const museumName = event.insect_museums?.name ?? '';
+        const area = event.insect_museums?.area ?? '';
+        return [title, museumName, area].some((v) => v.includes(searchText));
+      })
+    : sortedEvents.filter(
+        (event) => event.insect_museums && visibleMuseumIds.includes(event.insect_museums.id),
+      );
+
   return (
     <main>
       <div className='sticky top-0 z-10 bg-white shadow dark:bg-gray-900'>
@@ -173,6 +195,12 @@ export default function HomeClient({
         )}
 
         <div className='bg-white p-6 md:p-8 lg:p-10 dark:bg-gray-900'>
+          {tab === 'museums' && searchText.trim() === '' && (
+            <p className='mb-4 text-sm text-gray-500 dark:text-gray-300'>
+              ※ 地図に表示されている施設のみを表示中です
+            </p>
+          )}
+
           {tab === 'museums' ? (
             filteredMuseums.length === 0 ? (
               <div className='mt-4 text-sm text-gray-600 dark:text-gray-300'>
@@ -186,7 +214,7 @@ export default function HomeClient({
               </div>
             ) : (
               <ul className='mt-6 grid grid-cols-1 gap-6 md:grid-cols-2'>
-                {visibleMuseums.map((museum) => (
+                {filteredMuseums.map((museum) => (
                   <li
                     key={museum.id}
                     ref={(el) => {
@@ -274,7 +302,7 @@ export default function HomeClient({
             </div>
           ) : (
             <ul className='mt-6 grid grid-cols-1 gap-6 md:grid-cols-2'>
-              {sortedEvents.map((event) => (
+              {filteredEvents.map((event) => (
                 <li
                   key={event.id}
                   className='rounded-lg border p-4 shadow hover:shadow-md dark:border-gray-600 dark:bg-gray-800'
