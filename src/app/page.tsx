@@ -53,6 +53,16 @@ export default function HomePage() {
   //const mapRef = useRef<HTMLDivElement | null>(null);
   //const mapRef = useRef<L.Map | null>(null);
   const mapRef = useRef<HTMLDivElement | null>(null);
+  //const allMuseumIds = museums.map((m) => m.id);
+
+  useEffect(() => {
+    if (tab === 'museums') {
+      // museums が変わったときだけ再計算される
+      const ids = museums.map((m) => m.id);
+      setVisibleMuseumIds(ids);
+      setResetKey((k) => k + 1);
+    }
+  }, [tab, museums]);
 
   const scrollToTop = () => {
     if (typeof window !== 'undefined') {
