@@ -75,9 +75,10 @@ export default function HomePage() {
       }
       //if (mapRef.current) {
       //  mapRef.current.setView(DEFAULT_CENTER, 5);
-      //}
+      //　}
       setVisibleMuseumIds(museums.map((m) => m.id));
     }, 100);
+    setTab('museums');
   };
 
   const handleSearch = useCallback(
