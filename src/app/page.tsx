@@ -78,7 +78,7 @@ export default function HomePage() {
       //　}
       setVisibleMuseumIds(museums.map((m) => m.id));
     }, 100);
-    setTab('museums');
+    //setTab('museums');
   };
 
   const handleSearch = useCallback(
