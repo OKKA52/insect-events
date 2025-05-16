@@ -2,6 +2,7 @@
 'use client';
 
 import AreaTag from '@/components/AreaTag';
+import { toHalfWidth, katakanaToHiragana } from '@/utils/text';
 import { ArrowTopRightOnSquareIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
 import { FaFacebookSquare, FaInstagram } from 'react-icons/fa';
 import Image from 'next/image';
@@ -95,27 +96,58 @@ export default function HomeClient({
   hoveredMuseumId,
 }: HomeClientProps) {
   // const [visibleMuseumIds, setVisibleMuseumIds] = useState<number[]>([]);
+  const raw = searchText.trim();
+  const halfWidth = toHalfWidth(raw).normalize('NFC');
+  const hiraKey = katakanaToHiragana(halfWidth);
 
-  const filteredMuseums = searchText.trim()
-    ? sortedMuseums.filter((museum) =>
-        [museum.name, museum.prefecture, museum.area].some((v) => (v ?? '').includes(searchText)),
-      )
-    : visibleMuseums;
-
+  // ─── ① 地図に表示中の館IDに紐づくイベントだけをまず抽出 ───
   const eventsInMap = sortedEvents.filter(
-    (event) => event.insect_museums && visibleMuseumIds.includes(event.insect_museums.id),
+    (event) => event.insect_museums !== null && visibleMuseumIds.includes(event.insect_museums.id),
   );
 
-  const filteredEvents = searchText.trim()
+  // ─── ② ひらがな／半角カナ・漢字カナを混在させた部分一致フィルタ ───
+  const filteredEvents = raw
     ? eventsInMap.filter((event) => {
-        const title = event.title ?? '';
-        const museumName = event.insect_museums?.name ?? '';
-        const area = event.insect_museums?.area ?? '';
-        const prefecture = event.insect_museums?.prefecture ?? '';
-        const address = event.insect_museums?.address ?? '';
-        return [title, museumName, area, prefecture, address].some((v) => v.includes(searchText));
+        return [
+          // イベント固有
+          event.title,
+          // 施設情報（漢字／カナ／かな）すべてを対象に
+          event.insect_museums?.name,
+          event.insect_museums?.name_kana,
+          event.insect_museums?.prefecture,
+          event.insect_museums?.prefecture_kana,
+          event.insect_museums?.area,
+          event.insect_museums?.area_kana,
+          event.insect_museums?.address,
+          event.insect_museums?.address_kana,
+        ].some((v) => {
+          const str = (v ?? '').normalize('NFC');
+          const hw = toHalfWidth(str);
+          const hira = katakanaToHiragana(hw);
+          // 漢字／カナ文字列は hw, ひらがなは hiraKey で比較
+          return hw.includes(halfWidth) || hira.includes(hiraKey);
+        });
       })
     : eventsInMap;
+
+  // 同じ要領で filteredMuseums も…
+  const filteredMuseums = raw
+    ? sortedMuseums.filter((museum) => {
+        return [
+          museum.name,
+          museum.prefecture,
+          museum.area,
+          museum.name_kana,
+          museum.prefecture_kana,
+          museum.area_kana,
+        ].some((v) => {
+          const str = (v ?? '').normalize('NFC');
+          const hw = toHalfWidth(str);
+          const hira = katakanaToHiragana(hw);
+          return hw.includes(halfWidth) || hira.includes(hiraKey);
+        });
+      })
+    : visibleMuseums;
 
   return (
     <main>
