@@ -3,29 +3,20 @@ from bs4 import BeautifulSoup
 import re
 import unicodedata
 from datetime import datetime
-from supabase import create_client, Client
-from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
 import os
-import json, os
+import json
+import sys
+
+# ✅ src/lib/supabase_client を使うように修正
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+from src.lib.supabase_client import supabase
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 with open(os.path.join(BASE_DIR, "exclude_keywords.json"), "r", encoding="utf-8") as f:
     EXCLUDE_KEYWORDS = json.load(f)
 
-# スクリプト位置からルートの .env.test を参照
-dotenv_path = os.path.join(BASE_DIR, ".env.test")
-load_dotenv(dotenv_path=dotenv_path)
-
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-
-print("✅ URL =", SUPABASE_URL)
-print("✅ KEY =", '[OK]' if SUPABASE_KEY else '[MISSING]')
-
 MUSEUM_ID = "775284cf-d328-429d-b2e7-bbf894158bc9"
-
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def clean_text(text):
     if not text:
@@ -46,7 +37,6 @@ def remove_duplicate_sentences(text):
     return " ".join(unique_sentences)
 
 def parse_date_range(text):
-    # 例: 4/19(土)〜6/1(日) → [('4', '19'), ('6', '1')]
     match = re.findall(r"(\d{1,2})[\/月](\d{1,2})[（(]?[^\d)]*[）)]?", text)
     if not match:
         return None, None
@@ -55,7 +45,6 @@ def parse_date_range(text):
     current_year = today.year
 
     def infer_year(month: int):
-        # 10月以降に1月〜3月などが来た場合は翌年とみなす
         if today.month >= 10 and month <= 3:
             return current_year + 1
         return current_year
@@ -110,7 +99,6 @@ def fetch_events():
                 description = clean_text(description_el.text if description_el else "")
                 description = remove_duplicate_sentences(description)
 
-                # ① 別ファイルのリストで除外判定
                 if any(kw in title for kw in EXCLUDE_KEYWORDS):
                     print(f"⚠️ 除外ワード検出 → スキップ: {title}")
                     continue
@@ -131,7 +119,7 @@ def fetch_events():
                         "event_url": url,
                     })
 
-            page_num += 1  # 次ページへ
+            page_num += 1
 
         browser.close()
 
@@ -140,7 +128,7 @@ def fetch_events():
 
 def save_to_supabase(events):
     for event in events:
-        normalized_title = clean_text(event["title"])  # 正規化をここでも確実に適用
+        normalized_title = clean_text(event["title"])
         event["title"] = normalized_title
 
         existing = supabase.table("events")\
@@ -150,18 +138,15 @@ def save_to_supabase(events):
             .eq("start_date", event["start_date"])\
             .limit(1)\
             .execute()
-        
+
         if existing.data and len(existing.data) > 0:
-            # UPDATE
             event_id = existing.data[0]["id"]
             result = supabase.table("events").update(event).eq("id", event_id).execute()
             action = "🔄 更新完了"
         else:
-            # INSERT
             result = supabase.table("events").insert(event).execute()
             action = "🆕 新規登録"
 
-        # 結果出力（成功 or エラー内容表示）
         if hasattr(result, "data") and result.data:
             print(f"{action}: {event['title']}")
         elif hasattr(result, "status_code") and result.status_code >= 400:

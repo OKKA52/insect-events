@@ -1,0 +1,47 @@
+name: Daily Scraper
+
+on:
+  schedule:
+    - cron: '0 21 * * *' # 毎日06:00 JST（UTC 21:00）
+  workflow_dispatch: # 手動実行も許可
+
+jobs:
+  run-scrapers:
+    runs-on: ubuntu-latest
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🚀 Run scrape_itakon.py
+        run: python scripts/scrapers/scrape_itakon.py
+
+      # 必要に応じて他のスクリプトも順次実行
+      - name: 🚀 Run scrape_ryu_yo.py
+        run: python scripts/scrapers/scrape_ryu_yo.py
+
+      - name: 🚀 Run scrape_kamei.py
+        run: python scripts/scrapers/scrape_kamei.py
+
+      - name: 🚀 Run scrape_ht-shizenkan.py
+        run: python scripts/scrapers/scrape_ht-shizenkan.py
+
+      - name: 🚀 Run scrape_saitama-sizen.py
+        run: python scripts/scrapers/scrape_saitama-sizen.py
+
+      - name: 🚀 Run scrape_ibaraki-shizen.py
+        run: python scripts/scrapers/scrape_ibaraki-shizen.py

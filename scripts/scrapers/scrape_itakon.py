@@ -1,30 +1,24 @@
+# scripts/scrapers/scrape_itakon.py
+
 import requests
 from bs4 import BeautifulSoup
 import re
 import unicodedata
 from datetime import datetime
-from supabase import create_client, Client
-from dotenv import load_dotenv
 import os
-import json, os
+import json
+import sys
 
+# パスを通して src/lib から import 可能にする
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.append(BASE_DIR)
+
+from src.lib.supabase_client import supabase  # ✅ ここが新しいポイント
+
 with open(os.path.join(BASE_DIR, "exclude_keywords.json"), "r", encoding="utf-8") as f:
     EXCLUDE_KEYWORDS = json.load(f)
 
-# スクリプト位置からルートの .env.test を参照
-dotenv_path = os.path.join(BASE_DIR, ".env.test")
-load_dotenv(dotenv_path=dotenv_path)
-
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-
-print("✅ URL =", SUPABASE_URL)
-print("✅ KEY =", '[OK]' if SUPABASE_KEY else '[MISSING]')
-
 MUSEUM_ID = "f58d41b3-f940-439c-b7c7-70c73d108cea"
-
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def clean_text(text):
     if not text:
@@ -45,7 +39,6 @@ def remove_duplicate_sentences(text):
     return " ".join(unique_sentences)
 
 def parse_date_range(text):
-    # 例: 4/19(土)〜6/1(日) → [('4', '19'), ('6', '1')]
     match = re.findall(r"(\d{1,2})[\/月](\d{1,2})[（(]?[^\d)]*[）)]?", text)
     if not match:
         return None, None
@@ -54,7 +47,6 @@ def parse_date_range(text):
     current_year = today.year
 
     def infer_year(month: int):
-        # 10月以降に1月〜3月などが来た場合は翌年とみなす
         if today.month >= 10 and month <= 3:
             return current_year + 1
         return current_year
@@ -91,11 +83,9 @@ def fetch_events():
         title = clean_text(title_raw.text if title_raw else columns[1].text)
         description = ""
 
-        # 別セルに説明文がある場合
         if len(columns) >= 3:
             description = clean_text(columns[2].get_text(separator=" "))
 
-        # 次の tr に補足がある場合
         if i + 1 < len(rows):
             next_row = rows[i + 1]
             next_columns = next_row.find_all("td")
@@ -104,10 +94,8 @@ def fetch_events():
                 if extra:
                     description += " " + extra
 
-        # 重複除去
         description = remove_duplicate_sentences(description)
 
-        # ① 別ファイルのリストで除外判定
         if any(kw in title for kw in EXCLUDE_KEYWORDS):
             print(f"⚠️ 除外ワード検出 → スキップ: {title}")
             continue
@@ -125,31 +113,26 @@ def fetch_events():
 
     return events
 
-
 def save_to_supabase(events):
     for event in events:
-        normalized_title = clean_text(event["title"])  # 正規化をここでも確実に適用
+        normalized_title = clean_text(event["title"])
         existing = supabase.table("events")\
             .select("id")\
             .eq("museum_id", event["museum_id"])\
             .eq("title", event["title"])\
             .limit(1)\
             .execute()
-        
-        # 挿入／更新にも正規化済みタイトルを使う
-        event["title"] = normalized_title  
+
+        event["title"] = normalized_title
 
         if existing.data and len(existing.data) > 0:
-            # UPDATE
             event_id = existing.data[0]["id"]
             result = supabase.table("events").update(event).eq("id", event_id).execute()
             action = "🔄 更新完了"
         else:
-            # INSERT
             result = supabase.table("events").insert(event).execute()
             action = "🆕 新規登録"
 
-        # 結果出力（成功 or エラー内容表示）
         if hasattr(result, "data") and result.data:
             print(f"{action}: {event['title']}")
         elif hasattr(result, "status_code") and result.status_code >= 400:
