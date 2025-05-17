@@ -62,15 +62,10 @@ function AutoFitBounds({ museums }: { museums: Museum[] }) {
     const pins = museums.filter((m) => m.latitude && m.longitude);
 
     map.whenReady(() => {
-      try {
-        map.invalidateSize();
-      } catch (e) {
-        console.warn('⚠️ invalidateSize error:', e);
-      }
-
       requestAnimationFrame(() => {
         setTimeout(() => {
           try {
+            map.invalidateSize();
             if (pins.length === 0) {
               map.setView([36.2048, 138.2529], 5);
             } else if (pins.length === 1) {

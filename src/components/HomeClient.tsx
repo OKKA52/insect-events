@@ -4,6 +4,7 @@
 import AreaTag from '@/components/AreaTag';
 import { toHalfWidth, katakanaToHiragana } from '@/utils/text';
 import { ArrowTopRightOnSquareIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
+import { XMarkIcon } from '@heroicons/react/24/solid';
 import { FaFacebookSquare, FaInstagram } from 'react-icons/fa';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
@@ -179,20 +180,32 @@ export default function HomeClient({
           </div>
 
           <div className='flex items-center space-x-6'>
-            <input
-              type='text'
-              placeholder={
-                tab === 'museums' ? '施設名や県・エリア名で検索' : '施設名やイベント名で検索'
-              }
-              value={searchText}
-              onChange={(e) => handleSearch(e.target.value)}
-              className='w-full max-w-md rounded border bg-white p-2 text-base text-black dark:border-gray-600 dark:bg-gray-800 dark:text-white'
-            />
+            {/* 検索入力 */}
+            <div className='relative w-full max-w-md'>
+              <input
+                type='text'
+                placeholder={
+                  tab === 'museums' ? '施設名や県・エリア名で検索' : '施設名やイベント名で検索'
+                }
+                value={searchText}
+                onChange={(e) => handleSearch(e.target.value)}
+                className='w-full rounded border bg-white p-2 pr-10 text-base text-black dark:border-gray-600 dark:bg-gray-800 dark:text-white'
+              />
+              <button
+                onClick={handleClear}
+                className='absolute right-2 top-1/2 -translate-y-1/2 transform text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white'
+                aria-label='クリア'
+              >
+                <XMarkIcon className='h-5 w-5' />
+              </button>
+            </div>
+
+            {/* 👇 外側のクリアボタン（再設置） */}
             <button
               onClick={handleClear}
-              className='h-10 whitespace-nowrap rounded bg-blue-500 px-4 text-sm text-white hover:bg-blue-600'
+              className='h-10 whitespace-nowrap rounded border border-gray-400 bg-gray-100 px-4 text-sm text-gray-700 hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600'
             >
-              クリア
+              リセット
             </button>
           </div>
         </div>
