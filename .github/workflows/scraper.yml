@@ -27,10 +27,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: 🔧 Install Playwright browsers # ✅ これを追加
+        run: playwright install
+
       - name: 🚀 Run scrape_itakon.py
         run: python scripts/scrapers/scrape_itakon.py
 
-      # 必要に応じて他のスクリプトも順次実行
       - name: 🚀 Run scrape_ryuyo.py
         run: python scripts/scrapers/scrape_ryuyo.py
 
@@ -45,3 +47,4 @@ jobs:
 
       - name: 🚀 Run scrape_ibaraki-shizen.py
         run: python scripts/scrapers/scrape_ibaraki-shizen.py
+# 💡 必要に応じて他のスクリプトも順次実行
