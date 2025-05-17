@@ -31,8 +31,8 @@ jobs:
         run: python scripts/scrapers/scrape_itakon.py
 
       # 必要に応じて他のスクリプトも順次実行
-      - name: 🚀 Run scrape_ryu_yo.py
-        run: python scripts/scrapers/scrape_ryu_yo.py
+      - name: 🚀 Run scrape_ryuyo.py
+        run: python scripts/scrapers/scrape_ryuyo.py
 
       - name: 🚀 Run scrape_kamei.py
         run: python scripts/scrapers/scrape_kamei.py
