@@ -45,6 +45,6 @@ jobs:
       - name: 🚀 Run scrape_saitama-sizen.py
         run: python scripts/scrapers/scrape_saitama-sizen.py
 
-      - name: 🚀 Run scrape_ibaraki-shizen.py
-        run: python scripts/scrapers/scrape_ibaraki-shizen.py
+      - name: 🚀 Run scrape_ibaraki-sizen.py
+        run: python scripts/scrapers/scrape_ibaraki-sizen.py
 # 💡 必要に応じて他のスクリプトも順次実行
